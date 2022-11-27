@@ -26,6 +26,7 @@
     "homepage": "https://github.com/darverdevs/EaglerServerList#readme",
     "dependencies": {
         "@prisma/client": "^4.6.1",
+        "axios": "^1.1.3",
         "cookie-parser": "^1.4.6",
         "cors": "^2.8.5",
         "dotenv": "^16.0.3",
