@@ -6,6 +6,16 @@ import { daysFromNow, randomString } from "../utils";
 const router = Router();
 
 router.get("/", async (req: Request, res: Response) => {
+    if (req.cookies.session) {
+        const session = await prisma.session.findUnique({
+            where: {
+                sessionString: req.cookies.session,
+            },
+        });
+
+        if (session)
+            return res.redirect(process.env.FRONTEND_URI);
+    }
     if (!req.query || !req.query.code)
         return res.status(400).json({
             success: false,
@@ -29,7 +39,7 @@ router.get("/", async (req: Request, res: Response) => {
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded",
                 },
-            },
+            }
         );
     } catch (err) {
         return res.status(401).json({
@@ -78,7 +88,7 @@ router.get("/", async (req: Request, res: Response) => {
                 username: user.username,
             },
         });
-    
+
     if (lookup.username !== user.username)
         lookup = await prisma.user.update({
             where: {
@@ -96,34 +106,43 @@ router.get("/", async (req: Request, res: Response) => {
     });
 
     if (session) {
-        res.cookie("session", session.sessionString);
-        return res.json({
-            success: true,
-            message: "Logged in successfully.",
+        await prisma.session.update({
+            where: {
+                sessionString: session.sessionString,
+            },
+            data: {
+                expiresAt: daysFromNow(1),
+            },
         });
+        res.cookie("session", session.sessionString, {
+            expires: session.expiresAt,
+        });
+        return res.redirect(process.env.FRONTEND_URI);
     }
 
-    prisma.session.create({
-        data: {
-            sessionString: randomString(90),
-            userId: lookup.uuid,
-            expiresAt: daysFromNow(1),
-        },
-    }).then((session) => {
-        res.cookie("session", session.sessionString);
-        return res.json({
-            success: true,
-            message: "Logged in successfully.",
+    prisma.session
+        .create({
+            data: {
+                sessionString: randomString(90),
+                userId: lookup.uuid,
+                expiresAt: daysFromNow(1),
+            },
+        })
+        .then((session) => {
+            res.cookie("session", session.sessionString, {
+                expires: session.expiresAt,
+            });
+            return res.redirect(process.env.FRONTEND_URI);
+        })
+        .catch((err) => {
+            let s = randomString(20);
+            console.log(`Error occurred with ID ${s}:`);
+            console.log(err);
+            res.status(500).json({
+                success: true,
+                message: `An internal error occurred with ID ${s}.`,
+            });
         });
-    }).catch((err) => {
-        let s = randomString(20);
-        console.log(`Error occurred with ID ${s}:`);
-        console.log(err);
-        res.status(500).json({
-            success: true,
-            message: `An internal error occurred with ID ${s}.`,
-        });
-    });
 });
 
 export default router;
