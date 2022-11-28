@@ -1,5 +1,15 @@
+import { useState } from "react";
+import { UserProvider } from "../components/user";
 import "../styles/globals.css";
 
-export default function App({ Component, pageProps }) {
-    return <Component {...pageProps} />;
+const App = ({ Component, pageProps }) => {
+    const [user, setUser] = useState(null);
+
+    return (
+        <UserProvider value={{ user, setUser }}>
+            <Component {...pageProps} />
+        </UserProvider>
+    );
 }
+
+export default App;
