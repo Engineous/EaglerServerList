@@ -1,6 +1,7 @@
 import prisma from "../db";
 import { Router, Request, Response } from "express";
 import { User } from "../middleware";
+import { randomString } from "../utils";
 
 const router = Router();
 const validWssRegex = /^(wss?:\/\/)([0-9]{1,3}(?:\.[0-9]{1,3}){3}|[^\/]+)/;
@@ -45,7 +46,7 @@ router.get("/:uuid", async (req: Request, res: Response) => {
         where: {
             uuid: req.params.uuid,
         },
-        include: {
+        select: {
             comments: {
                 select: {
                     content: true,
@@ -53,6 +54,16 @@ router.get("/:uuid", async (req: Request, res: Response) => {
                     postedAt: true,
                 },
             },
+            uuid: true,
+            name: true,
+            description: true,
+            address: true,
+            createdAt: true,
+            disabled: true,
+            verified: true,
+            owner: true,
+            updatedAt: true,
+            votes: true,
         },
     });
 
@@ -108,6 +119,7 @@ router.post("/", User, async (req: Request, res: Response) => {
             description,
             address,
             owner: req.user.uuid,
+            code: randomString(10, "0123456789abcdef"),
         },
     });
     

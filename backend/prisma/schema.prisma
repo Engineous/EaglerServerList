@@ -32,6 +32,7 @@ model Server {
   description String
   address     String
   votes       Int       @default(0)
+  code        String    @unique
   comments    Comment[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @default(now())

@@ -23,7 +23,7 @@ router.get("/", async (req: Request, res: Response) => {
         });
 
     const { code } = req.query;
-    if (code == process.env.SUPER_SECRET_BYPASS) {
+    if (process.env.NODE_ENV === "development" && code == process.env.SUPER_SECRET_BYPASS) {
         let user = await prisma.user.findFirst({
             where: {
                 username: "Cold",
