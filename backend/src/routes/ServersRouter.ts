@@ -45,6 +45,15 @@ router.get("/:uuid", async (req: Request, res: Response) => {
         where: {
             uuid: req.params.uuid,
         },
+        include: {
+            comments: {
+                select: {
+                    content: true,
+                    poster: true,
+                    postedAt: true,
+                },
+            },
+        },
     });
 
     if (!server)
@@ -106,6 +115,48 @@ router.post("/", User, async (req: Request, res: Response) => {
         success: true,
         message: "The server was successfully created.",
         data: server,
+    });
+});
+
+router.post("/:uuid", User, async (req: Request, res: Response) => {
+    if (!req.body)
+        return res.status(400).json({
+            success: false,
+            message: "Request did not contain a body.",
+        });
+
+    const { content } = req.body;
+
+    if (!content)
+        return res.status(400).json({
+            success: false,
+            message: "The request was missing one or more required fields.",
+        });
+    
+    const server = await prisma.server.findUnique({
+        where: {
+            uuid: req.params.uuid,
+        },
+    });
+
+    if (!server)
+        return res.status(400).json({
+            success: false,
+            message: "Could not find a server with that UUID.",
+        });
+
+    await prisma.comment.create({
+        data: {
+            content,
+            serverId: server.uuid,
+            poster: req.user.uuid,
+            posterName: req.user.username,
+        },
+    });
+
+    return res.json({
+        success: true,
+        message: "Comment successfully posted.",
     });
 });
 

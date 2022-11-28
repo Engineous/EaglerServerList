@@ -32,10 +32,23 @@ model Server {
   description String
   address     String
   votes       Int      @default(0)
+  comments    Comment[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @default(now())
 
   @@map("servers")
+}
+
+model Comment {
+  id Int @id @default(autoincrement())
+  server Server @relation(fields: [serverId], references: [uuid])
+  serverId String
+  content String
+  poster String
+  posterName String
+  postedAt DateTime @default(now())
+
+  @@map("comments")
 }
 
 model Session {
