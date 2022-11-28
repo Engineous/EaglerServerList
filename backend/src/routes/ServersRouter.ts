@@ -26,6 +26,20 @@ router.get("/", async (_req: Request, res: Response) => {
     });
 });
 
+router.get("/@me", User, async (req: Request, res: Response) => {
+    const servers = await prisma.server.findMany({
+        where: {
+            owner: req.user.uuid,
+        },
+    });
+
+    return res.json({
+        success: true,
+        message: `Successfully retrieved ${servers.length} servers.`,
+        data: servers,
+    });
+});
+
 router.get("/:uuid", async (req: Request, res: Response) => {
     const server = await prisma.server.findUnique({
         where: {
@@ -92,6 +106,41 @@ router.post("/", User, async (req: Request, res: Response) => {
         success: true,
         message: "The server was successfully created.",
         data: server,
+    });
+});
+
+router.put("/:uuid", async (req: Request, res: Response) => {
+    // TODO: finish
+});
+
+router.delete("/:uuid", User, async (req: Request, res: Response) => {
+    const server = await prisma.server.findUnique({
+        where: {
+            uuid: req.params.uuid,
+        },
+    });
+
+    if (!server)
+        return res.status(400).json({
+            success: false,
+            message: "Could not find a server with that UUID.",
+        });
+
+    if (server.owner !== req.user.uuid && !req.user.admin)
+        return res.status(403).json({
+            success: false,
+            message: "You do not have permission to delete other users' servers.",
+        });
+
+    await prisma.server.delete({
+        where: {
+            uuid: req.params.uuid,
+        },
+    });
+
+    return res.json({
+        success: true,
+        message: "Successfully deleted server.",
     });
 });
 
