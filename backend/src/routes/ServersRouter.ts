@@ -1,7 +1,9 @@
 import prisma from "../db";
 import { Router, Request, Response } from "express";
+import { User } from "../middleware";
 
 const router = Router();
+const validWssRegex = /^(wss?:\/\/)([0-9]{1,3}(?:\.[0-9]{1,3}){3}|[^\/]+)/;
 
 router.get("/", async (_req: Request, res: Response) => {
     const servers = await prisma.server.findMany({
@@ -40,6 +42,55 @@ router.get("/:uuid", async (req: Request, res: Response) => {
     return res.json({
         success: true,
         message: "Successfully fetched data for server " + server.uuid,
+        data: server,
+    });
+});
+
+router.post("/", User, async (req: Request, res: Response) => {
+    if (!req.body)
+        return res.status(400).json({
+            success: false,
+            message: "Request did not contain a body.",
+        });
+
+    const { name, description, address } = req.body;
+
+    if (!name || !description || !address)
+        return res.status(400).json({
+            success: false,
+            message: "The request is missing one or more required fields.",
+        });
+
+    if (!validWssRegex.test(address))
+        return res.status(400).json({
+            success: false,
+            message: "The address specified is invalid.",
+        });
+
+    if (name.length > 100)
+        return res.status(400).json({
+            success: false,
+            message: "The server name specified is too long!",
+        });
+
+    if (description.length > 1500)
+        return res.status(400).json({
+            success: false,
+            message: "The description specified is too long!",
+        });
+
+    const server = await prisma.server.create({
+        data: {
+            name,
+            description,
+            address,
+            owner: req.user.uuid,
+        },
+    });
+    
+    return res.json({
+        success: true,
+        message: "The server was successfully created.",
         data: server,
     });
 });
