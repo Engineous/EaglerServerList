@@ -11,7 +11,6 @@ router.get("/", async (_req: Request, res: Response) => {
         select: {
             uuid: true,
             name: true,
-            description: true,
             verified: true,
             address: true,
             votes: true,
@@ -22,6 +21,26 @@ router.get("/", async (_req: Request, res: Response) => {
         success: true,
         message: `Successfully retrieved ${servers.length} servers.`,
         data: servers,
+    });
+});
+
+router.get("/:uuid", async (req: Request, res: Response) => {
+    const server = await prisma.server.findUnique({
+        where: {
+            uuid: req.params.uuid,
+        },
+    });
+
+    if (!server)
+        return res.status(404).json({
+            success: false,
+            message: "A server with that UUID could not be found.",
+        });
+
+    return res.json({
+        success: true,
+        message: "Successfully fetched data for server " + server.uuid,
+        data: server,
     });
 });
 
