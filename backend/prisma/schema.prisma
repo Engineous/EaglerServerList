@@ -27,6 +27,7 @@ model Server {
   user        User      @relation(fields: [owner], references: [uuid])
   disabled    Boolean   @default(false)
   verified    Boolean   @default(false)
+  approved    Boolean   @default(false)
   owner       String
   name        String
   description String
