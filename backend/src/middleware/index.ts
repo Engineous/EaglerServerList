@@ -51,6 +51,21 @@ const User = async (req: Request, res: Response, next: NextFunction) => {
         });
     }
 
+    if (user.banned) {
+        await prisma.session.delete({
+            where: {
+                sessionString,
+            },
+        });
+
+        return res.status(403).json({
+            success: false,
+            message:
+                "Your account is banned from the server list. Reason: " +
+                user.banReason,
+        });
+    }
+
     req.user = user;
     return next();
 };
@@ -115,4 +130,15 @@ const Admin = async (req: Request, res: Response, next: NextFunction) => {
     return next();
 };
 
-export { User, Admin };
+const StringsOnly = (req: Request, res: Response, next: NextFunction) => {
+    if (!req.body) return next();
+
+    for (const index in req.body) {
+        const field = req.body[index];
+        if (typeof field !== "string") delete req.body[index];
+    }
+
+    return next();
+};
+
+export { User, Admin, StringsOnly };

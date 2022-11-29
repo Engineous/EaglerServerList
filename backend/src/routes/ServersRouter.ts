@@ -1,9 +1,10 @@
 import prisma from "../db";
 import { Router, Request, Response } from "express";
 import { User } from "../middleware";
-import { daysFromNow, randomString } from "../utils";
+import { daysFromNow, randomString, validateCaptcha } from "../utils";
 import { WebSocket } from "ws";
 import { createHash } from "crypto";
+import rateLimit from "express-rate-limit";
 
 const router = Router();
 const validWssRegex = /^(wss?:\/\/)([0-9]{1,3}(?:\.[0-9]{1,3}){3}|[^\/]+)/;
@@ -53,6 +54,7 @@ router.get("/:uuid", async (req: Request, res: Response) => {
                 select: {
                     content: true,
                     poster: true,
+                    posterName: true,
                     postedAt: true,
                 },
             },
@@ -121,80 +123,90 @@ router.get("/:uuid/full", User, async (req: Request, res: Response) => {
     });
 });
 
-router.post("/", User, async (req: Request, res: Response) => {
-    if (!req.body)
-        return res.status(400).json({
-            success: false,
-            message: "Request did not contain a body.",
+router.post(
+    "/",
+    rateLimit({
+        windowMs: 5 * 60 * 1000,
+        max: 10,
+        standardHeaders: true,
+        legacyHeaders: false,
+    }),
+    User,
+    async (req: Request, res: Response) => {
+        if (!req.body)
+            return res.status(400).json({
+                success: false,
+                message: "Request did not contain a body.",
+            });
+
+        const { name, description, address } = req.body;
+
+        if (!name || !description || !address)
+            return res.status(400).json({
+                success: false,
+                message: "The request is missing one or more required fields.",
+            });
+
+        if (!validWssRegex.test(address))
+            return res.status(400).json({
+                success: false,
+                message: "The address specified is invalid.",
+            });
+
+        if (name.length > 100)
+            return res.status(400).json({
+                success: false,
+                message: "The server name specified is too long!",
+            });
+
+        if (description.length > 1500)
+            return res.status(400).json({
+                success: false,
+                message: "The description specified is too long!",
+            });
+
+        const nameLookup = await prisma.server.findFirst({
+            where: {
+                owner: req.user.uuid,
+                name,
+            },
         });
 
-    const { name, description, address } = req.body;
+        if (nameLookup)
+            return res.status(400).json({
+                success: false,
+                message: "You cannot create two servers with the same name.",
+            });
 
-    if (!name || !description || !address)
-        return res.status(400).json({
-            success: false,
-            message: "The request is missing one or more required fields.",
+        const addressLookup = await prisma.server.findFirst({
+            where: {
+                address,
+            },
         });
 
-    if (!validWssRegex.test(address))
-        return res.status(400).json({
-            success: false,
-            message: "The address specified is invalid.",
+        if (addressLookup)
+            return res.status(400).json({
+                success: false,
+                message: "A server already exists with this address.",
+            });
+
+        const server = await prisma.server.create({
+            data: {
+                name,
+                description,
+                address,
+                owner: req.user.uuid,
+                code: randomString(10, "0123456789abcdef"),
+            },
         });
 
-    if (name.length > 100)
-        return res.status(400).json({
-            success: false,
-            message: "The server name specified is too long!",
+        return res.json({
+            success: true,
+            message: "The server was successfully created.",
+            data: server,
         });
-
-    if (description.length > 1500)
-        return res.status(400).json({
-            success: false,
-            message: "The description specified is too long!",
-        });
-
-    const nameLookup = await prisma.server.findFirst({
-        where: {
-            owner: req.user.uuid,
-            name,
-        },
-    });
-
-    if (nameLookup)
-        return res.status(400).json({
-            success: false,
-            message: "You cannot create two servers with the same name.",
-        });
-
-    const addressLookup = await prisma.server.findFirst({
-        where: {
-            address,
-        },
-    });
-
-    if (addressLookup)
-        return res.status(400).json({
-            success: false,
-            message: "A server already exists with this address.",
-        });
-
-    const server = await prisma.server.create({
-        data: {
-            name,
-            description,
-            address,
-            owner: req.user.uuid,
-            code: randomString(10, "0123456789abcdef"),
-        },
-    });
-
-    return res.json({
-        success: true,
-        message: "The server was successfully created.",
-        data: server,
-    });
-});
+    }
+);
 
 router.post("/:uuid", User, async (req: Request, res: Response) => {
     if (!req.body)
@@ -203,12 +215,18 @@ router.post("/:uuid", User, async (req: Request, res: Response) => {
             message: "Request did not contain a body.",
         });
 
-    const { content } = req.body;
+    const { content, captcha } = req.body;
 
-    if (!content)
+    if (!content || !captcha)
         return res.status(400).json({
             success: false,
             message: "The request was missing one or more required fields.",
+        });
+
+    if (content.length > 200)
+        return res.status(400).json({
+            success: false,
+            message: "Comments may not exceed 200 characters.",
         });
 
     const server = await prisma.server.findUnique({
@@ -222,6 +240,15 @@ router.post("/:uuid", User, async (req: Request, res: Response) => {
             success: false,
             message: "Could not find a server with that UUID.",
         });
+
+    try {
+        await validateCaptcha(captcha);
+    } catch (_) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid CAPTCHA response.",
+        });
+    }
 
     await prisma.comment.create({
         data: {
@@ -292,7 +319,29 @@ router.put("/:uuid", User, async (req: Request, res: Response) => {
 });
 
 router.post("/:uuid/vote", User, async (req: Request, res: Response) => {
-    // TODO: captcha
+    if (!req.body)
+        return res.status(400).json({
+            success: false,
+            message: "Request did not specify a body.",
+        });
+
+    const { captcha } = req.body;
+
+    if (!captcha)
+        return res.status(400).json({
+            success: false,
+            message: "Nice try. (missing captcha in request body)",
+        });
+
+    try {
+        await validateCaptcha(captcha);
+    } catch (_) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid CAPTCHA response.",
+        });
+    }
+
     const server = await prisma.server.findUnique({
         where: {
             uuid: req.params.uuid,

@@ -134,6 +134,14 @@ router.get("/", async (req: Request, res: Response) => {
             },
         });
 
+    if (lookup.banned)
+        return res.status(403).json({
+            success: false,
+            message:
+                "Your account is banned from the server list. Reason: " +
+                lookup.banReason,
+        });
+
     if (lookup.username !== user.username)
         lookup = await prisma.user.update({
             where: {

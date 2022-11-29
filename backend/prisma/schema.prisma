@@ -18,6 +18,8 @@ model User {
   updatedAt DateTime       @default(now())
   servers   Server[]
   admin     Boolean        @default(false)
+  banned    Boolean        @default(false)
+  banReason String?
   cooldowns VoteCooldown[]
 
   @@map("users")

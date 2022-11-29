@@ -107,4 +107,112 @@ router.delete("/:uuid", Admin, async (req: Request, res: Response) => {
     });
 });
 
+router.post("/:uuid/ban", Admin, async (req: Request, res: Response) => {
+    const user = await prisma.user.findUnique({
+        where: {
+            uuid: req.params.uuid,
+        },
+    });
+
+    if (!user)
+        return res.status(400).json({
+            success: false,
+            message: "A user with that UUID could not be found.",
+        });
+
+    if (user.admin)
+        return res.status(400).json({
+            success: false,
+            message: "You cannot ban this user, as this user is an admin.",
+        });
+
+    if (user.banned)
+        return res.status(400).json({
+            success: false,
+            message: "You cannot ban a user who is already banned.",
+        });
+
+    let reason;
+    if (!req.body) reason = "No reason specified.";
+
+    reason = req.body.reason;
+
+    await prisma.user.update({
+        where: {
+            uuid: user.uuid,
+        },
+        data: {
+            banned: true,
+            banReason: reason,
+            updatedAt: new Date(),
+        },
+    });
+
+    await prisma.session.deleteMany({
+        where: {
+            userId: user.uuid,
+        },
+    });
+
+    await prisma.server.updateMany({
+        where: {
+            owner: user.uuid,
+        },
+        data: {
+            disabled: true,
+            updatedAt: new Date(),
+        },
+    });
+
+    return res.json({
+        success: true,
+        message: "This user has successfully been banned.",
+    });
+});
+
+router.post("/:uuid/unban", Admin, async (req: Request, res: Response) => {
+    const user = await prisma.user.findUnique({
+        where: {
+            uuid: req.params.uuid,
+        },
+    });
+
+    if (!user)
+        return res.status(400).json({
+            success: false,
+            message: "A user with that UUID could not be found.",
+        });
+
+    if (!user.banned)
+        return res.status(400).json({
+            success: false,
+            message: "This user is not banned.",
+        });
+
+    await prisma.user.update({
+        where: {
+            uuid: user.uuid,
+        },
+        data: {
+            banned: false,
+            banReason: null,
+            updatedAt: new Date(),
+        },
+    });
+
+    await prisma.server.updateMany({
+        where: {
+            owner: user.uuid,
+        },
+        data: {
+            disabled: false,
+        },
+    });
+
+    return res.json({
+        success: true,
+        message: "This user has successfully been unbanned.",
+    });
+});
+
 export default router;
