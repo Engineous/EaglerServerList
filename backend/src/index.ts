@@ -16,4 +16,17 @@ verifyConnection().then(() => {
             `Backend is successfully running on port ${process.env.PORT!}`
         )
     );
+    setInterval(async () => {
+        const cooldowns = await prisma.voteCooldown.findMany();
+        await Promise.all(
+            cooldowns.map(async (cooldown) => {
+                if (cooldown.expiresAt < new Date())
+                    await prisma.voteCooldown.delete({
+                        where: {
+                            uuid: cooldown.uuid,
+                        },
+                    });
+            })
+        );
+    }, 60000);
 });

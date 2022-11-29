@@ -1,7 +1,7 @@
 import prisma from "../db";
 import { Router, Request, Response } from "express";
 import { User } from "../middleware";
-import { randomString } from "../utils";
+import { daysFromNow, randomString } from "../utils";
 import { WebSocket } from "ws";
 import { createHash } from "crypto";
 
@@ -288,6 +288,71 @@ router.put("/:uuid", User, async (req: Request, res: Response) => {
         success: true,
         message: "Successfully updated server.",
         data: server,
+    });
+});
+
+router.post("/:uuid/vote", User, async (req: Request, res: Response) => {
+    // TODO: captcha
+    const server = await prisma.server.findUnique({
+        where: {
+            uuid: req.params.uuid,
+        },
+    });
+
+    if (!server)
+        return res.status(400).json({
+            success: false,
+            message: "A server with that UUID could not be found.",
+        });
+
+    if (!server.verified)
+        return res.status(400).json({
+            success: false,
+            message: "You may not vote for a server that is unverified.",
+        });
+
+    if (server.disabled)
+        return res.status(400).json({
+            success: false,
+            message: "A server with that UUID could not be found.",
+        });
+
+    const cooldown = await prisma.voteCooldown.findFirst({
+        where: {
+            userId: req.user.uuid,
+            serverId: server.uuid,
+        },
+    });
+
+    if (cooldown)
+        return res.status(400).json({
+            success: false,
+            message: "You are currently on a vote cooldown.",
+        });
+
+    await prisma.server.update({
+        where: {
+            uuid: server.uuid,
+        },
+        data: {
+            votes: {
+                increment: 1,
+            },
+        },
+    });
+
+    await prisma.voteCooldown.create({
+        data: {
+            userId: req.user.uuid,
+            serverId: server.uuid,
+            expiresAt: daysFromNow(1),
+        },
+    });
+
+    return res.json({
+        success: true,
+        message:
+            "Successfully voted for this server. You can vote again in 24 hours.",
     });
 });
 
