@@ -19,7 +19,8 @@ app.use(
 app.use((_err: Error, _req: Request, res: Response, next: NextFunction) => {
     res.status(400).json({
         success: false,
-        message: "Body of request contained malformed JSON data. Check your syntax.",
+        message:
+            "Body of request contained malformed JSON data. Check your syntax.",
     });
 });
 

@@ -13,8 +13,7 @@ router.get("/", async (req: Request, res: Response) => {
             },
         });
 
-        if (session)
-            return res.redirect(process.env.FRONTEND_URI);
+        if (session) return res.redirect(process.env.FRONTEND_URI);
     }
     if (!req.query || !req.query.code)
         return res.status(400).json({
@@ -23,7 +22,10 @@ router.get("/", async (req: Request, res: Response) => {
         });
 
     const { code } = req.query;
-    if (process.env.NODE_ENV === "development" && code == process.env.SUPER_SECRET_BYPASS) {
+    if (
+        process.env.NODE_ENV === "development" &&
+        code == process.env.SUPER_SECRET_BYPASS
+    ) {
         let user = await prisma.user.findFirst({
             where: {
                 username: "Cold",
@@ -48,7 +50,7 @@ router.get("/", async (req: Request, res: Response) => {
             res.cookie("session", session.sessionString, {
                 expires: session.expiresAt,
             });
-            
+
             return res.redirect(process.env.FRONTEND_URI);
         }
 
@@ -63,7 +65,7 @@ router.get("/", async (req: Request, res: Response) => {
         res.cookie("session", session.sessionString, {
             expires: session.expiresAt,
         });
-        
+
         return res.redirect(process.env.FRONTEND_URI);
     }
     let oauthResult;

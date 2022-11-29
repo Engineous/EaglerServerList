@@ -82,7 +82,7 @@ router.get("/:uuid", async (req: Request, res: Response) => {
     });
 });
 
-router.get("/:uuid/admin", User, async (req: Request, res: Response) => { 
+router.get("/:uuid/full", User, async (req: Request, res: Response) => {
     const server = await prisma.server.findUnique({
         where: {
             uuid: req.params.uuid,
@@ -108,7 +108,7 @@ router.get("/:uuid/admin", User, async (req: Request, res: Response) => {
             code: true,
         },
     });
-    if (server.owner !== req.user.uuid && !req.user.admin){
+    if (server.owner !== req.user.uuid && !req.user.admin) {
         return res.status(403).json({
             success: false,
             message: "You do not have permission to view this information.",
@@ -162,7 +162,7 @@ router.post("/", User, async (req: Request, res: Response) => {
             code: randomString(10, "0123456789abcdef"),
         },
     });
-    
+
     return res.json({
         success: true,
         message: "The server was successfully created.",
@@ -184,7 +184,7 @@ router.post("/:uuid", User, async (req: Request, res: Response) => {
             success: false,
             message: "The request was missing one or more required fields.",
         });
-    
+
     const server = await prisma.server.findUnique({
         where: {
             uuid: req.params.uuid,
@@ -242,7 +242,8 @@ router.put("/:uuid", User, async (req: Request, res: Response) => {
     if (server.owner !== req.user.uuid && !req.user.admin)
         return res.status(403).json({
             success: false,
-            message: "You do not have permission to update other users' servers.",
+            message:
+                "You do not have permission to update other users' servers.",
         });
 
     const newServer = await prisma.server.update({
@@ -252,6 +253,7 @@ router.put("/:uuid", User, async (req: Request, res: Response) => {
         data: {
             name: name ?? server.name,
             description: description ?? server.description,
+            updatedAt: new Date(),
         },
     });
     delete newServer.code;
@@ -279,7 +281,8 @@ router.delete("/:uuid", User, async (req: Request, res: Response) => {
     if (server.owner !== req.user.uuid && !req.user.admin)
         return res.status(403).json({
             success: false,
-            message: "You do not have permission to delete other users' servers.",
+            message:
+                "You do not have permission to delete other users' servers.",
         });
 
     await prisma.server.delete({
@@ -293,71 +296,71 @@ router.delete("/:uuid", User, async (req: Request, res: Response) => {
         message: "Successfully deleted server.",
     });
 });
+
 router.post("/:uuid/verify", User, async (req: Request, res: Response) => {
     const server = await prisma.server.findUnique({
         where: {
             uuid: req.params.uuid,
         },
-    })
+    });
+
     if (!server)
         return res.status(404).json({
             success: false,
             message: "A server with that UUID could not be found.",
         });
-    if (server.approved === true){
+
+    if (server.verified)
         return res.status(400).json({
             success: false,
-            message: "This server has already been approved.",
+            message: "This server has already been verified.",
         });
-    }
+
     if (server.owner !== req.user.uuid && !req.user.admin)
         return res.status(403).json({
             success: false,
-            message: "You do not have permission to approve this server.",
+            message: "You do not have permission to verify this server.",
         });
-    try{
+
+    try {
         const ws = await new WebSocket(server.address);
-        var shasum = createHash("sha1");
-        var msg = ""
-        ws.onopen = async function(){
+        let shasum = createHash("sha1");
+        let msg = "";
+        ws.onopen = async () =>
             ws.send("Accept: " + shasum.update(server.code).digest("hex"));
-        };
-        ws.onmessage = async function(message){
-            msg = message.data.toString();
-        };
-        ws.close = async function(){
-            if (msg === "OK"){
+        ws.onmessage = async (message) => (msg = message.data.toString());
+        ws.close = async () => {
+            if (msg == "OK") {
                 await prisma.server.update({
                     where: {
                         uuid: server.uuid,
                     },
                     data: {
-                        approved: true,
+                        verified: true,
                     },
                 });
                 return res.json({
                     success: true,
-                    message: "Successfully approved server.",
+                    message: "Successfully verified server.",
                 });
-            }
-            else{
-                return res.json({
+            } else
+                return res.status(400).json({
                     success: false,
-                    message: "Could not approve server. Please try again!",
-                })
-            }
+                    message: "Could not verify server, please try again!",
+                });
         };
-        ws.onerror = async function(){
-            return res.status(400).json({
+        ws.onerror = async () =>
+            res.status(400).json({
                 success: false,
                 message: "Unable to verify server, please try again!",
             });
-        }
-    }catch(e){
+    } catch (_) {
         return res.status(400).json({
             success: false,
             message: "Unable to verify server, please try again!",
         });
     }
 });
+
+
 export default router;

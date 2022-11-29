@@ -53,7 +53,7 @@ const User = async (req: Request, res: Response, next: NextFunction) => {
 
     req.user = user;
     return next();
-}
+};
 
 const Admin = async (req: Request, res: Response, next: NextFunction) => {
     if (!req.cookies.session)
@@ -113,6 +113,6 @@ const Admin = async (req: Request, res: Response, next: NextFunction) => {
 
     req.user = user;
     return next();
-}
+};
 
 export { User, Admin };
