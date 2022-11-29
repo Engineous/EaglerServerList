@@ -178,7 +178,7 @@ router.post("/", User, async (req: Request, res: Response) => {
             success: false,
             message: "A server already exists with this address.",
         });
-    
+
     const server = await prisma.server.create({
         data: {
             name,

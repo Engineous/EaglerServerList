@@ -76,4 +76,35 @@ router.get("/:uuid/full", Admin, async (req: Request, res: Response) => {
     });
 });
 
+router.delete("/:uuid", Admin, async (req: Request, res: Response) => {
+    const user = await prisma.user.findUnique({
+        where: {
+            uuid: req.params.uuid,
+        },
+    });
+
+    if (!user)
+        return res.status(400).json({
+            success: false,
+            message: "A user with that UUID could not be found.",
+        });
+
+    if (user.admin)
+        return res.status(403).json({
+            success: false,
+            message: "Admin accounts cannot be deleted via this endpoint.",
+        });
+
+    await prisma.user.delete({
+        where: {
+            uuid: req.params.uuid,
+        },
+    });
+
+    return res.json({
+        success: true,
+        message: "Successfully deleted that user.",
+    });
+});
+
 export default router;
