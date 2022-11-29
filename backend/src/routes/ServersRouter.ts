@@ -153,6 +153,32 @@ router.post("/", User, async (req: Request, res: Response) => {
             success: false,
             message: "The description specified is too long!",
         });
+
+    const nameLookup = await prisma.server.findFirst({
+        where: {
+            owner: req.user.uuid,
+            name,
+        },
+    });
+
+    if (nameLookup)
+        return res.status(400).json({
+            success: false,
+            message: "You cannot create two servers with the same name.",
+        });
+
+    const addressLookup = await prisma.server.findFirst({
+        where: {
+            address,
+        },
+    });
+
+    if (addressLookup)
+        return res.status(400).json({
+            success: false,
+            message: "A server already exists with this address.",
+        });
+    
     const server = await prisma.server.create({
         data: {
             name,
@@ -361,6 +387,5 @@ router.post("/:uuid/verify", User, async (req: Request, res: Response) => {
         });
     }
 });
-
 
 export default router;
