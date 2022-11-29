@@ -172,8 +172,55 @@ router.post("/:uuid", User, async (req: Request, res: Response) => {
     });
 });
 
-router.put("/:uuid", async (req: Request, res: Response) => {
-    // TODO: finish
+router.put("/:uuid", User, async (req: Request, res: Response) => {
+    if (!req.body)
+        return res.status(400).json({
+            success: false,
+            message: "Request did not contain a body.",
+        });
+
+    const { name, description } = req.body;
+
+    if (!name && !description)
+        return res.status(400).json({
+            success: false,
+            message: "No fields specified that can be updated.",
+        });
+
+    const server = await prisma.server.findUnique({
+        where: {
+            uuid: req.params.uuid,
+        },
+    });
+
+    if (!server)
+        return res.status(404).json({
+            success: false,
+            message: "A server with that UUID could not be found.",
+        });
+
+    if (server.owner !== req.user.uuid && !req.user.admin)
+        return res.status(403).json({
+            success: false,
+            message: "You do not have permission to update other users' servers.",
+        });
+
+    const newServer = await prisma.server.update({
+        where: {
+            uuid: server.uuid,
+        },
+        data: {
+            name: name ?? server.name,
+            description: description ?? server.description,
+        },
+    });
+    delete newServer.code;
+
+    return res.json({
+        success: true,
+        message: "Successfully updated server.",
+        data: server,
+    });
 });
 
 router.delete("/:uuid", User, async (req: Request, res: Response) => {

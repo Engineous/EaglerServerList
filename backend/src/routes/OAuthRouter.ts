@@ -182,7 +182,7 @@ router.get("/", async (req: Request, res: Response) => {
             console.log(`Error occurred with ID ${s}:`);
             console.log(err);
             res.status(500).json({
-                success: true,
+                success: false,
                 message: `An internal error occurred with ID ${s}.`,
             });
         });
