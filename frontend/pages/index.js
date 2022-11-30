@@ -1,10 +1,11 @@
 import Head from "next/head";
 import Image from "next/image";
+import Navbar from "../components/navbar";
 import styles from "../styles/Home.module.css";
 
 export default function Home() {
     return (
-        <div>
+        <>
             <Head>
                 <title>Eagler Server List | Home</title>
                 <meta
@@ -28,6 +29,9 @@ export default function Home() {
                 <meta property="og:type" content="website" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
-        </div>
+            <div className={styles.root}>
+                <Navbar />
+            </div>
+        </>
     );
 }
