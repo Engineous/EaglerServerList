@@ -8,6 +8,7 @@ import rateLimit from "express-rate-limit";
 
 const router = Router();
 const validWssRegex = /^(wss?:\/\/)([0-9]{1,3}(?:\.[0-9]{1,3}){3}|[^\/]+)/;
+const validTage = ["PVP", "PVE", "Factions", "Minigames", "Survival", "Creative", "Skyblock", "Prison", "RPG", "Other"];
 
 router.get("/", async (_req: Request, res: Response) => {
     const servers = await prisma.server.findMany({
@@ -20,6 +21,7 @@ router.get("/", async (_req: Request, res: Response) => {
             verified: true,
             address: true,
             votes: true,
+            tags: true,
         },
     });
 
@@ -41,6 +43,13 @@ router.get("/@me", User, async (req: Request, res: Response) => {
         success: true,
         message: `Successfully retrieved ${servers.length} servers.`,
         data: servers,
+    });
+});
+router.get("/tags", async (_req: Request, res: Response) => {
+    return res.json({
+        success: true,
+        message: `Successfully retrieved ${validTage.length} tags.`,
+        data: validTage,
     });
 });
 
@@ -66,6 +75,7 @@ router.get("/:uuid", async (req: Request, res: Response) => {
             disabled: true,
             verified: true,
             owner: true,
+            tags: true,
             updatedAt: true,
             votes: true,
         },
@@ -105,6 +115,7 @@ router.get("/:uuid/full", User, async (req: Request, res: Response) => {
             disabled: true,
             verified: true,
             owner: true,
+            tags: true,
             updatedAt: true,
             votes: true,
             code: true,
@@ -139,14 +150,19 @@ router.post(
                 message: "Request did not contain a body.",
             });
 
-        const { name, description, address } = req.body;
+        const { name, description, address, tags } = req.body;
 
         if (!name || !description || !address)
             return res.status(400).json({
                 success: false,
                 message: "The request is missing one or more required fields.",
             });
-
+        const contains = tags.every((tag: string) => {return validTage.includes(tag)});
+        if (!contains)
+            return res.status(400).json({
+                success: false,
+                message: "These tags are not valid",
+            });
         if (!validWssRegex.test(address))
             return res.status(400).json({
                 success: false,
@@ -197,6 +213,7 @@ router.post(
                 address,
                 owner: req.user.uuid,
                 code: randomString(10, "0123456789abcdef"),
+                tags: tags ?? [],
             },
         });
 

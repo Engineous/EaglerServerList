@@ -35,6 +35,7 @@ model Server {
   name        String
   description String
   address     String
+  tags        String[]
   votes       Int       @default(0)
   code        String    @unique
   comments    Comment[]
