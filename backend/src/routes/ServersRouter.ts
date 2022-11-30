@@ -208,7 +208,15 @@ router.post(
     }
 );
 
-router.post("/:uuid", User, async (req: Request, res: Response) => {
+router.post("/:uuid",
+    rateLimit({
+        windowMs: 5 * 60 * 1000,
+        max: 10,
+        standardHeaders: true,
+        legacyHeaders: false,
+    }),
+    User, 
+    async (req: Request, res: Response) => {
     if (!req.body)
         return res.status(400).json({
             success: false,
