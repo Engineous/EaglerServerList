@@ -4,7 +4,20 @@ import { ExplicitTypesOnFields, StringsOnly, User } from "../../middleware";
 import { randomString } from "../../utils";
 import rateLimit from "express-rate-limit";
 import IdRouter from "./IdRouter";
+import { Tag } from "@prisma/client";
 
+const validTags = [
+    "PVP",
+    "PVE",
+    "FACTIONS",
+    "MINIGAMES",
+    "SURVIVAL",
+    "CREATIVE",
+    "SKYBLOCK",
+    "PRISON",
+    "RPG",
+    "MISCELLANEOUS",
+];
 const router = Router();
 const validWssRegex = /^(wss?:\/\/)([0-9]{1,3}(?:\.[0-9]{1,3}){3}|[^\/]+)/;
 
@@ -155,6 +168,22 @@ router.post(
                 success: false,
                 message: "You cannot own more than 5 servers.",
             });
+        if (tags && !Array.isArray(tags))
+        return res.status(400).json({
+            success: false,
+            message: "Tags must be an array.",
+        });
+        try {
+            (tags as any[]).forEach((tag) => {
+                if (typeof tag !== "string" || !validTags.includes(tag))
+                    throw new Error();
+            });
+        } catch (e) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid tags specified.",
+            });
+        }
 
         const server = await prisma.server.create({
             data: {

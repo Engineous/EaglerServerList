@@ -214,10 +214,7 @@ router.put(
         try {
             // cancer code, TODO: fix
             (tags as any[]).forEach((tag) => {
-                if (typeof tag !== "string")
-                    throw new Error();
-                
-                if (!validTags.includes(tag))
+                if (typeof tag !== "string" || !validTags.includes(tag))
                     throw new Error();
             });
         } catch (e) {
