@@ -102,7 +102,9 @@ router.post(
         const nameLookup = await prisma.server.findFirst({
             where: {
                 owner: req.user.uuid,
-                name,
+                name: {
+                    mode: "insensitive",
+                },
             },
         });
 
