@@ -124,6 +124,18 @@ router.post(
                 message: "A server already exists with this address.",
             });
 
+        const servers = await prisma.server.findMany({
+            where: {
+                owner: req.user.uuid,
+            },
+        });
+
+        if (servers.length >= 5)
+            return res.status(400).json({
+                success: false,
+                message: "You cannot own more than 5 servers.",
+            });
+
         const server = await prisma.server.create({
             data: {
                 name,
