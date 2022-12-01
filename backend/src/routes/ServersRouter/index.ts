@@ -1,6 +1,6 @@
 import prisma from "../../db";
 import { Router, Request, Response } from "express";
-import { User } from "../../middleware";
+import { ExplicitTypesOnFields, StringsOnly, User } from "../../middleware";
 import { randomString } from "../../utils";
 import rateLimit from "express-rate-limit";
 import IdRouter from "./IdRouter";
@@ -65,6 +65,24 @@ router.post(
         standardHeaders: true,
         legacyHeaders: false,
     }),
+    ExplicitTypesOnFields([
+        {
+            name: "name",
+            type: "string",
+        },
+        {
+            name: "description",
+            type: "string",
+        },
+        {
+            name: "address",
+            type: "string",
+        },
+        {
+            name: "tags",
+            type: "object",
+        },
+    ]),
     User,
     async (req: Request, res: Response) => {
         if (!req.body)
@@ -73,9 +91,9 @@ router.post(
                 message: "Request did not contain a body.",
             });
 
-        const { name, description, address } = req.body;
+        const { name, description, address, tags } = req.body;
 
-        if (!name || !description || !address)
+        if (!name || !description || !address || !tags)
             return res.status(400).json({
                 success: false,
                 message: "The request is missing one or more required fields.",

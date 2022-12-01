@@ -7,7 +7,7 @@ import { StringsOnly } from "../middleware";
 const router = Router();
 
 router.use("/oauth", StringsOnly, OAuthRouter);
-router.use("/users", StringsOnly, UsersRouter);
+router.use("/users", UsersRouter);
 router.use("/servers", StringsOnly, ServersRouter);
 
 router.use((_req: Request, res: Response, next: NextFunction) => {

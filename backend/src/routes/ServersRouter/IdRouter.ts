@@ -1,10 +1,24 @@
 import prisma from "../../db";
 import { Router, Request, Response } from "express";
-import { User } from "../../middleware";
+import { ExplicitTypesOnFields, StringsOnly, User } from "../../middleware";
 import { daysFromNow, validateCaptcha } from "../../utils";
 import { WebSocket } from "ws";
 import { createHash } from "crypto";
 import rateLimit from "express-rate-limit";
+import { Tag } from "@prisma/client";
+
+const validTags = [
+    "PVP",
+    "PVE",
+    "FACTIONS",
+    "MINIGAMES",
+    "SURVIVAL",
+    "CREATIVE",
+    "SKYBLOCK",
+    "PRISON",
+    "RPG",
+    "MISCELLANEOUS",
+];
 
 const router = Router({
     mergeParams: true,
@@ -99,6 +113,7 @@ router.post(
         standardHeaders: true,
         legacyHeaders: false,
     }),
+    StringsOnly,
     User,
     async (req: Request, res: Response) => {
         if (!req.body)
@@ -158,58 +173,99 @@ router.post(
     }
 );
 
-router.put("/:uuid", User, async (req: Request, res: Response) => {
-    if (!req.body)
-        return res.status(400).json({
-            success: false,
-            message: "Request did not contain a body.",
-        });
-
-    const { name, description } = req.body;
-
-    if (!name && !description)
-        return res.status(400).json({
-            success: false,
-            message: "No fields specified that can be updated.",
-        });
-
-    const server = await prisma.server.findUnique({
-        where: {
-            uuid: req.params.uuid,
+router.put(
+    "/:uuid",
+    ExplicitTypesOnFields([
+        {
+            name: "name",
+            type: "string",
         },
-    });
+        {
+            name: "description",
+            type: "string",
+        },
+        {
+            name: "tags",
+            type: "object",
+        },
+    ]),
+    User,
+    async (req: Request, res: Response) => {
+        if (!req.body)
+            return res.status(400).json({
+                success: false,
+                message: "Request did not contain a body.",
+            });
 
-    if (!server)
-        return res.status(404).json({
-            success: false,
-            message: "A server with that UUID could not be found.",
+        const { name, description, tags } = req.body;
+
+        if (!name && !description && !tags)
+            return res.status(400).json({
+                success: false,
+                message: "No fields specified that can be updated.",
+            });
+
+        if (tags && !Array.isArray(tags))
+            return res.status(400).json({
+                success: false,
+                message: "Tags must be an array.",
+            });
+
+        try {
+            // cancer code, TODO: fix
+            (tags as any[]).forEach((tag) => {
+                if (typeof tag !== "string")
+                    throw new Error();
+                
+                if (!validTags.includes(tag))
+                    throw new Error();
+            });
+        } catch (e) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid tags specified.",
+            });
+        }
+
+        const server = await prisma.server.findUnique({
+            where: {
+                uuid: req.params.uuid,
+            },
         });
 
-    if (server.owner !== req.user.uuid && !req.user.admin)
-        return res.status(403).json({
-            success: false,
-            message:
-                "You do not have permission to update other users' servers.",
+        if (!server)
+            return res.status(404).json({
+                success: false,
+                message: "A server with that UUID could not be found.",
+            });
+
+        if (server.owner !== req.user.uuid && !req.user.admin)
+            return res.status(403).json({
+                success: false,
+                message:
+                    "You do not have permission to update other users' servers.",
+            });
+
+        const newServer = await prisma.server.update({
+            where: {
+                uuid: server.uuid,
+            },
+            data: {
+                name: name ?? server.name,
+                description: description ?? server.description,
+                tags: tags ?? server.tags,
+                updatedAt: new Date(),
+            },
         });
+        delete newServer.code;
 
-    const newServer = await prisma.server.update({
-        where: {
-            uuid: server.uuid,
-        },
-        data: {
-            name: name ?? server.name,
-            description: description ?? server.description,
-            updatedAt: new Date(),
-        },
-    });
-    delete newServer.code;
-
-    return res.json({
-        success: true,
-        message: "Successfully updated server.",
-        data: server,
-    });
-});
+        return res.json({
+            success: true,
+            message: "Successfully updated server.",
+            data: server,
+        });
+    }
+);
 
 router.post("/:uuid/vote", User, async (req: Request, res: Response) => {
     if (!req.body)

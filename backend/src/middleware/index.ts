@@ -1,6 +1,32 @@
 import { Request, Response, NextFunction } from "express";
 import prisma from "../db";
 
+type FieldWithType = {
+    name: string;
+    type:
+        | "bigint"
+        | "boolean"
+        | "function"
+        | "number"
+        | "object"
+        | "string"
+        | "symbol"
+        | "undefined";
+};
+
+const ExplicitTypesOnFields = (fields: FieldWithType[]) => {
+    return (req: Request, res: Response, next: NextFunction) => {
+        if (!req.body) return next();
+
+        for (const field in fields) {
+            const name = fields[field].name;
+            const type = fields[field].type;
+
+            if (typeof req.body[name] !== type) delete req.body[name];
+        }
+    };
+};
+
 const User = async (req: Request, res: Response, next: NextFunction) => {
     if (!req.cookies.session)
         return res.status(401).json({
@@ -141,4 +167,4 @@ const StringsOnly = (req: Request, res: Response, next: NextFunction) => {
     return next();
 };
 
-export { User, Admin, StringsOnly };
+export { ExplicitTypesOnFields, User, Admin, StringsOnly };
