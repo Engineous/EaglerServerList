@@ -35,7 +35,8 @@ model Server {
   name        String
   description String
   address     String
-  tags        String[]
+  tags        Tag[]
+  version     String    @default("1.5")
   votes       Int       @default(0)
   code        String    @unique
   comments    Comment[]
@@ -74,4 +75,17 @@ model VoteCooldown {
   expiresAt DateTime
 
   @@map("voteCooldowns")
+}
+
+enum Tag {
+  PVP
+  PVE
+  FACTIONS
+  MINIGAMES
+  SURVIVAL
+  CREATIVE
+  SKYBLOCK
+  PRISON
+  RPG
+  MISCELLANEOUS
 }
