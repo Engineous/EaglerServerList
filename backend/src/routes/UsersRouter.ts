@@ -164,6 +164,12 @@ router.post("/:uuid/ban", Admin, async (req: Request, res: Response) => {
         },
     });
 
+    await prisma.comment.deleteMany({
+        where: {
+            poster: user.uuid,
+        },
+    });
+
     return res.json({
         success: true,
         message: "This user has successfully been banned.",
