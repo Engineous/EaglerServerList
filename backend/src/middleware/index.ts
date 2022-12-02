@@ -24,6 +24,8 @@ const ExplicitTypesOnFields = (fields: FieldWithType[]) => {
 
             if (typeof req.body[name] !== type) delete req.body[name];
         }
+
+        return next();
     };
 };
 

@@ -168,11 +168,13 @@ router.post(
                 success: false,
                 message: "You cannot own more than 5 servers.",
             });
+
         if (tags && !Array.isArray(tags))
-        return res.status(400).json({
-            success: false,
-            message: "Tags must be an array.",
-        });
+            return res.status(400).json({
+                success: false,
+                message: "Tags must be an array.",
+            });
+
         try {
             (tags as any[]).forEach((tag) => {
                 if (typeof tag !== "string" || !validTags.includes(tag))
