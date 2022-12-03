@@ -193,6 +193,7 @@ router.post(
                 description,
                 address,
                 owner: req.user.uuid,
+                tags: tags as Tag[],
                 code: randomString(10, "0123456789abcdef"),
             },
         });
