@@ -1,10 +1,27 @@
-FROM node:16
-WORKDIR /home/eaglerserverlist/backend/
+FROM node:alpine AS deps
+WORKDIR /app
+
 COPY package*.json ./
-RUN npm ci --only=production
-RUN npm install typescript
+
+RUN npm i
+
 COPY . .
+
 RUN npx prisma generate
-WORKDIR /home/eaglerserverlist/backend/dist/
-EXPOSE 3002
-CMD ["node", "index.js"]
+RUN npm run build
+
+FROM node:alpine AS app
+WORKDIR /app
+
+COPY --from=deps /app/dist ./dist
+COPY --from=deps /app/prisma ./prisma
+COPY --from=deps /app/package-lock.json ./package-lock.json
+COPY --from=deps /app/package.json ./package.json
+COPY --from=deps /app/.env ./.env
+
+RUN npm ci --only=production
+RUN npx prisma generate
+
+EXPOSE 3001
+
+CMD [ "npm", "start" ]
