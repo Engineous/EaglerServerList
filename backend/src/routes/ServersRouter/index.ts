@@ -178,8 +178,7 @@ router.post(
 
         try {
             tags.forEach((tag) => {
-                if (!validTags.includes(tag))
-                    throw new Error();
+                if (!validTags.includes(tag)) throw new Error();
             });
         } catch (_) {
             return res.status(400).json({

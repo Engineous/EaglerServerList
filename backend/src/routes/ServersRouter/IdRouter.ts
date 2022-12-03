@@ -202,7 +202,8 @@ router.put(
                 message: "Request did not contain a body.",
             });
 
-        const { name, description, tags } = req.body;
+        const { name, description } = req.body;
+        const tags: string[] = req.body.tags;
 
         if (!name && !description && !tags)
             return res.status(400).json({
@@ -217,12 +218,10 @@ router.put(
             });
 
         try {
-            // cancer code, TODO: fix
-            (tags as any[]).forEach((tag) => {
-                if (typeof tag !== "string" || !validTags.includes(tag))
-                    throw new Error();
+            tags.forEach((tag) => {
+                if (!validTags.includes(tag)) throw new Error();
             });
-        } catch (e) {
+        } catch (_) {
             return res.status(400).json({
                 success: false,
                 message: "Invalid tags specified.",
@@ -259,12 +258,11 @@ router.put(
                 updatedAt: new Date(),
             },
         });
-        delete newServer.code;
 
         return res.json({
             success: true,
             message: "Successfully updated server.",
-            data: server,
+            data: newServer,
         });
     }
 );
