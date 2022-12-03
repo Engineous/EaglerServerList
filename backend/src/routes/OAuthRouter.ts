@@ -51,7 +51,19 @@ router.get("/", async (req: Request, res: Response) => {
                 expires: session.expiresAt,
             });
 
-            return res.redirect(process.env.FRONTEND_URI);
+            await prisma.session.update({
+                where: {
+                    sessionString: session.sessionString,
+                },
+                data: {
+                    expiresAt: daysFromNow(1),
+                },
+            });
+
+            return res.json({
+                success: true,
+                message: "Applied debug session",
+            });
         }
 
         session = await prisma.session.create({
@@ -66,7 +78,10 @@ router.get("/", async (req: Request, res: Response) => {
             expires: session.expiresAt,
         });
 
-        return res.redirect(process.env.FRONTEND_URI);
+        return res.json({
+            success: true,
+            message: "Applied debug session",
+        });
     }
     let oauthResult;
     try {

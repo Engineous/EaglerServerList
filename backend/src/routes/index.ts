@@ -8,7 +8,7 @@ const router = Router();
 
 router.use("/oauth", StringsOnly, OAuthRouter);
 router.use("/users", UsersRouter);
-router.use("/servers", StringsOnly, ServersRouter);
+router.use("/servers", ServersRouter);
 
 router.use((_req: Request, res: Response, next: NextFunction) => {
     res.status(404).json({

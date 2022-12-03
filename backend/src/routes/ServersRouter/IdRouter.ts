@@ -5,7 +5,6 @@ import { daysFromNow, validateCaptcha } from "../../utils";
 import { WebSocket } from "ws";
 import { createHash } from "crypto";
 import rateLimit from "express-rate-limit";
-import { Tag } from "@prisma/client";
 
 const validTags = [
     "PVP",
@@ -54,6 +53,12 @@ router.get("/:uuid", async (req: Request, res: Response) => {
 
     if (!server)
         return res.status(404).json({
+            success: false,
+            message: "A server with that UUID could not be found.",
+        });
+
+    if (server.disabled)
+        return res.status(400).json({
             success: false,
             message: "A server with that UUID could not be found.",
         });

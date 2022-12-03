@@ -1,10 +1,9 @@
 import prisma from "../../db";
 import { Router, Request, Response } from "express";
-import { ExplicitTypesOnFields, StringsOnly, User } from "../../middleware";
+import { ExplicitTypesOnFields, User } from "../../middleware";
 import { randomString } from "../../utils";
 import rateLimit from "express-rate-limit";
 import IdRouter from "./IdRouter";
-import { Tag } from "@prisma/client";
 
 const validTags = [
     "PVP",
@@ -104,7 +103,8 @@ router.post(
                 message: "Request did not contain a body.",
             });
 
-        const { name, description, address, tags } = req.body;
+        const { name, description, address } = req.body;
+        const tags: string[] = req.body.tags;
 
         if (!name || !description || !address || !tags)
             return res.status(400).json({
@@ -135,6 +135,7 @@ router.post(
                 owner: req.user.uuid,
                 name: {
                     mode: "insensitive",
+                    equals: name,
                 },
             },
         });
@@ -176,14 +177,16 @@ router.post(
             });
 
         try {
-            (tags as any[]).forEach((tag) => {
-                if (typeof tag !== "string" || !validTags.includes(tag))
+            tags.forEach((tag) => {
+                if (!validTags.includes(tag))
                     throw new Error();
             });
-        } catch (e) {
+        } catch (_) {
             return res.status(400).json({
                 success: false,
-                message: "Invalid tags specified.",
+                message:
+                    "Invalid tags specified. Allowed values: " +
+                    validTags.join(", "),
             });
         }
 
@@ -193,7 +196,7 @@ router.post(
                 description,
                 address,
                 owner: req.user.uuid,
-                tags: tags as Tag[],
+                tags,
                 code: randomString(10, "0123456789abcdef"),
             },
         });
