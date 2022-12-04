@@ -1,15 +1,22 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Loading from "../components/loading";
 import { UserProvider } from "../components/user";
 import "../styles/globals.css";
+import api from "../api";
 
 const App = ({ Component, pageProps }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    setTimeout(() => {
-        setLoading(false);
-    }, 1000);
+    useEffect(() => {
+        api.getUser()
+            .then((data) => {
+                if (data && data.data) setUser(data.data);
+            })
+            .catch(() => setUser(null));
+
+        setTimeout(() => setLoading(false), 500);
+    }, [user]);
 
     return loading ? (
         <Loading />
@@ -18,6 +25,6 @@ const App = ({ Component, pageProps }) => {
             <Component {...pageProps} />
         </UserProvider>
     );
-}
+};
 
 export default App;

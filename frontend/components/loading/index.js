@@ -20,7 +20,7 @@ const Loading = () => {
                 <h1>Loading...</h1>
             </ThemeProvider>
         </div>
-    )
-}
+    );
+};
 
 export default Loading;

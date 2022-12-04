@@ -1,9 +1,11 @@
 import Head from "next/head";
-import Image from "next/image";
-import Navbar from "../components/navbar";
 import styles from "../styles/Home.module.css";
+import Navbar from "../components/navbar";
+import { useUser } from "../components/user";
 
 export default function Home() {
+    const { user } = useUser();
+
     return (
         <>
             <Head>
@@ -22,10 +24,7 @@ export default function Home() {
                     content="The brand new, rewritten Eaglercraft server list. Built from the ground up to be more secure and elegant."
                 />
                 <meta property="theme-color" content="#FB8464" />
-                <meta
-                    property="og:title"
-                    content="Eagler Server List - Home"
-                />
+                <meta property="og:title" content="Eagler Server List - Home" />
                 <meta property="og:type" content="website" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
