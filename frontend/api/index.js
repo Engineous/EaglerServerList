@@ -20,6 +20,18 @@ class API {
             endpoint: "/users/@me",
         });
     }
+
+    async getServer(uuid) {
+        return await this.request({
+            endpoint: `/servers/${uuid}`,
+        });
+    }
+
+    async getServers(page) {
+        return await this.request({
+            endpoint: `/servers?page=${page}`,
+        });
+    }
 }
 
 export default new API();
