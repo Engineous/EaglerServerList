@@ -108,6 +108,13 @@ router.get("/full", User, async (req: Request, res: Response) => {
             code: true,
         },
     });
+
+    if (!server)
+        return res.status(400).json({
+            success: false,
+            message: "Could not find a server with that UUID.",
+        });
+    
     if (server.owner !== req.user.uuid && !req.user.admin) {
         return res.status(403).json({
             success: false,
