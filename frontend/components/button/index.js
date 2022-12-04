@@ -10,9 +10,7 @@ const Button = ({ color, icon, children, onClick, style }) => {
             className={styles.button}
             onClick={onClick}
         >
-            <div className={styles.buttonIcon}>
-                {icon}
-            </div>
+            <div className={styles.buttonIcon}>{icon}</div>
             {children}
         </button>
     );

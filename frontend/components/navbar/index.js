@@ -6,6 +6,42 @@ import StorageIcon from "@mui/icons-material/Storage";
 import Link from "next/link";
 import Button from "../button";
 import { FaDiscord } from "react-icons/fa";
+import { useState } from "react";
+import { Menu, MenuItem } from "@mui/material";
+
+const Avatar = () => {
+    const [anchorEl, setAnchorEl] = useState(null);
+    const { user, setUser } = useUser();
+    const router = useRouter();
+    const open = Boolean(anchorEl);
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+    const handleClose = () => {
+        setAnchorEl(null);
+    };
+
+    return (
+        <>
+            <div className={styles.avatar} onClick={handleClick}>
+                <img src={user.avatar} />
+                <h2>{user.username}</h2>
+            </div>
+            <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+                <MenuItem
+                    onClick={() => {
+                        handleClose();
+                        document.cookie =
+                            "session=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;";
+                        router.reload();
+                    }}
+                >
+                    Logout
+                </MenuItem>
+            </Menu>
+        </>
+    );
+};
 
 const Navbar = () => {
     const { user } = useUser();
@@ -59,13 +95,22 @@ const Navbar = () => {
                 })}
             </ul>
             {user ? (
-                <div className={styles.avatar}>
-                    <img src={user.avatar} />
-                    <h2>{user.username}</h2>
-                </div>
+                <Avatar />
             ) : (
                 <div style={{ margin: "0 10px 0 0" }}>
-                    <Button icon={<FaDiscord size={24} />} color="#5865F2">
+                    <Button
+                        icon={<FaDiscord size={24} />}
+                        color="#5865F2"
+                        onClick={() =>
+                            router.push(
+                                `https://discord.com/oauth2/authorize?client_id=${
+                                    process.env.NEXT_PUBLIC_CLIENT_ID
+                                }&redirect_uri=${encodeURIComponent(
+                                    process.env.NEXT_PUBLIC_REDIRECT_URI
+                                )}&response_type=code&scope=identify`
+                            )
+                        }
+                    >
                         Login with Discord
                     </Button>
                 </div>

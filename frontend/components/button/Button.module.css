@@ -9,6 +9,7 @@
     justify-content: center;
     gap: 5px;
     cursor: pointer;
+    transition: 0.2s all ease-in-out;
 }
 
 .button svg {
@@ -18,4 +19,14 @@
     flex-direction: row;
     align-items: center;
     justify-content: center;
+}
+
+.button:hover {
+    box-shadow: inset 0 0 0 10em rgba(255, 255, 255, 0.3);
+    transition: 0.2s all ease-in-out;
+}
+
+.button:active {
+    box-shadow: inset 0 0 0 10em rgba(0, 0, 0, 0.3);
+    transition: 0.2s all ease-in-out;
 }

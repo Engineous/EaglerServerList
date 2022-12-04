@@ -12,6 +12,7 @@
     -webkit-box-shadow: -1px 2px 17px 1px rgba(0, 0, 0, 0.75);
     -moz-box-shadow: -1px 2px 17px 1px rgba(0, 0, 0, 0.75);
     border-radius: 0 0 10px 10px;
+    user-select: none;
 }
 
 .logo {
@@ -28,7 +29,7 @@
     padding: 0;
     max-width: 35px;
     max-height: 35px;
-    border-radius: 5px;
+    border-radius: 35px;
 }
 
 .logo h1 {
@@ -68,7 +69,7 @@
 
 .navElements li:active {
     background-color: #1e1e1e;
-    transition: .2s all ease-in-out;
+    transition: 0.2s all ease-in-out;
 }
 
 .active {
@@ -91,6 +92,11 @@
 
 .avatar:hover {
     background-color: #3e3e3e;
+    transition: 0.2s all ease-in-out;
+}
+
+.avatar:active {
+    background-color: #1e1e1e;
     transition: 0.2s all ease-in-out;
 }
 
