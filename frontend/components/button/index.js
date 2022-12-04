@@ -1,11 +1,20 @@
-const Button = ({ color, icon, children }) => {
+import styles from "./Button.module.css";
+
+const Button = ({ color, icon, children, onClick, style }) => {
     return (
         <button
             style={{
-                color,
+                ...style,
+                backgroundColor: color,
             }}
             className={styles.button}
-        ></button>
+            onClick={onClick}
+        >
+            <div className={styles.buttonIcon}>
+                {icon}
+            </div>
+            {children}
+        </button>
     );
 };
 

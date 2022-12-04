@@ -4,6 +4,8 @@ import styles from "./Navbar.module.css";
 import HomeIcon from "@mui/icons-material/Home";
 import StorageIcon from "@mui/icons-material/Storage";
 import Link from "next/link";
+import Button from "../button";
+import { FaDiscord } from "react-icons/fa";
 
 const Navbar = () => {
     const { user } = useUser();
@@ -56,10 +58,16 @@ const Navbar = () => {
                     );
                 })}
             </ul>
-            {user && (
+            {user ? (
                 <div className={styles.avatar}>
                     <img src={user.avatar} />
                     <h2>{user.username}</h2>
+                </div>
+            ) : (
+                <div style={{ margin: "0 10px 0 0" }}>
+                    <Button icon={<FaDiscord size={24} />} color="#5865F2">
+                        Login with Discord
+                    </Button>
                 </div>
             )}
         </nav>
