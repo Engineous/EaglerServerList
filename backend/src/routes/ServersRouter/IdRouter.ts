@@ -23,7 +23,7 @@ const router = Router({
     mergeParams: true,
 });
 
-router.get("/:uuid", async (req: Request, res: Response) => {
+router.get("/", async (req: Request, res: Response) => {
     const server = await prisma.server.findUnique({
         where: {
             uuid: req.params.uuid,
@@ -70,7 +70,7 @@ router.get("/:uuid", async (req: Request, res: Response) => {
     });
 });
 
-router.get("/:uuid/full", User, async (req: Request, res: Response) => {
+router.get("/full", User, async (req: Request, res: Response) => {
     const server = await prisma.server.findUnique({
         where: {
             uuid: req.params.uuid,
@@ -111,7 +111,7 @@ router.get("/:uuid/full", User, async (req: Request, res: Response) => {
 });
 
 router.post(
-    "/:uuid",
+    "/",
     rateLimit({
         windowMs: 5 * 60 * 1000,
         max: 10,
@@ -179,7 +179,7 @@ router.post(
 );
 
 router.put(
-    "/:uuid",
+    "/",
     ExplicitTypesOnFields([
         {
             name: "name",
@@ -267,7 +267,7 @@ router.put(
     }
 );
 
-router.post("/:uuid/vote", User, async (req: Request, res: Response) => {
+router.post("/vote", User, async (req: Request, res: Response) => {
     if (!req.body)
         return res.status(400).json({
             success: false,
@@ -354,7 +354,7 @@ router.post("/:uuid/vote", User, async (req: Request, res: Response) => {
     });
 });
 
-router.delete("/:uuid", User, async (req: Request, res: Response) => {
+router.delete("/", User, async (req: Request, res: Response) => {
     const server = await prisma.server.findUnique({
         where: {
             uuid: req.params.uuid,
@@ -386,7 +386,7 @@ router.delete("/:uuid", User, async (req: Request, res: Response) => {
     });
 });
 
-router.post("/:uuid/verify", User, async (req: Request, res: Response) => {
+router.post("/verify", User, async (req: Request, res: Response) => {
     const server = await prisma.server.findUnique({
         where: {
             uuid: req.params.uuid,
