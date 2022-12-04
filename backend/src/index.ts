@@ -34,15 +34,18 @@ verifyConnection().then(() => {
         )
     );
     setInterval(async () => {
-        const cooldowns = await prisma.voteCooldown.findMany();
+        const cooldowns = await prisma.voteCooldown.findMany().catch(() => {});
+        if (!cooldowns) return;
         await Promise.all(
             cooldowns.map(async (cooldown) => {
                 if (cooldown.expiresAt < new Date())
-                    await prisma.voteCooldown.delete({
-                        where: {
-                            uuid: cooldown.uuid,
-                        },
-                    });
+                    await prisma.voteCooldown
+                        .delete({
+                            where: {
+                                uuid: cooldown.uuid,
+                            },
+                        })
+                        .catch(() => {});
             })
         );
     }, 60000);

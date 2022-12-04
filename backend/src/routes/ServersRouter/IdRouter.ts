@@ -32,8 +32,13 @@ router.get("/", async (req: Request, res: Response) => {
             comments: {
                 select: {
                     content: true,
-                    poster: true,
-                    posterName: true,
+                    poster: {
+                        select: {
+                            uuid: true,
+                            username: true,
+                            avatar: true,
+                        },
+                    },
                     postedAt: true,
                 },
             },
@@ -79,7 +84,13 @@ router.get("/full", User, async (req: Request, res: Response) => {
             comments: {
                 select: {
                     content: true,
-                    poster: true,
+                    poster: {
+                        select: {
+                            uuid: true,
+                            username: true,
+                            avatar: true,
+                        },
+                    },
                     postedAt: true,
                 },
             },
@@ -166,8 +177,7 @@ router.post(
             data: {
                 content,
                 serverId: server.uuid,
-                poster: req.user.uuid,
-                posterName: req.user.username,
+                posterId: req.user.uuid,
             },
         });
 

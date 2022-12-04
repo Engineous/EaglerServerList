@@ -166,7 +166,7 @@ router.post("/:uuid/ban", Admin, async (req: Request, res: Response) => {
 
     await prisma.comment.deleteMany({
         where: {
-            poster: user.uuid,
+            posterId: user.uuid,
         },
     });
 
