@@ -1,20 +1,20 @@
 import { useUser } from "../user";
 import { useRouter } from "next/router";
 import styles from "./Navbar.module.css";
-import HomeIcon from '@mui/icons-material/Home';
-import StorageIcon from '@mui/icons-material/Storage';
+import HomeIcon from "@mui/icons-material/Home";
+import StorageIcon from "@mui/icons-material/Storage";
 import Link from "next/link";
 
 const Navbar = () => {
     const { user } = useUser();
     const router = useRouter();
     const navElements = [
-            {
-                href: "/",
-                name: "Home",
-                icon: <HomeIcon />,
-            },
-        ];
+        {
+            href: "/",
+            name: "Home",
+            icon: <HomeIcon />,
+        },
+    ];
     if (user)
         navElements.push({
             href: "/servers",
@@ -32,17 +32,28 @@ const Navbar = () => {
                 {navElements.map((navElement, index) => {
                     if (router.pathname == navElement.href)
                         return (
-                            <li className={styles.active} onClick={() => router.push(navElement.href)} key={index}>
+                            <li
+                                className={styles.active}
+                                onClick={() => router.push(navElement.href)}
+                                key={index}
+                            >
                                 {navElement.icon}
-                                <Link href={navElement.href}>{navElement.name}</Link>
+                                <Link href={navElement.href}>
+                                    {navElement.name}
+                                </Link>
                             </li>
                         );
                     return (
-                        <li onClick={() => router.push(navElement.href)} key={index}>
+                        <li
+                            onClick={() => router.push(navElement.href)}
+                            key={index}
+                        >
                             {navElement.icon}
-                            <Link href={navElement.href}>{navElement.name}</Link>
+                            <Link href={navElement.href}>
+                                {navElement.name}
+                            </Link>
                         </li>
-                    )
+                    );
                 })}
             </ul>
             {user && (

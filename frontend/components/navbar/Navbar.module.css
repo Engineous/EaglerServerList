@@ -8,9 +8,9 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    box-shadow: -1px 2px 17px 1px rgba(0,0,0,0.75);
-    -webkit-box-shadow: -1px 2px 17px 1px rgba(0,0,0,0.75);
-    -moz-box-shadow: -1px 2px 17px 1px rgba(0,0,0,0.75);
+    box-shadow: -1px 2px 17px 1px rgba(0, 0, 0, 0.75);
+    -webkit-box-shadow: -1px 2px 17px 1px rgba(0, 0, 0, 0.75);
+    -moz-box-shadow: -1px 2px 17px 1px rgba(0, 0, 0, 0.75);
 }
 
 .logo {
@@ -57,12 +57,12 @@
     gap: 5px;
     color: #fff;
     cursor: pointer;
-    transition: .2s all ease-in-out;
+    transition: 0.2s all ease-in-out;
 }
 
 .navElements li:hover {
     background-color: #3e3e3e;
-    transition: .2s all ease-in-out;
+    transition: 0.2s all ease-in-out;
 }
 
 .active {
@@ -79,13 +79,13 @@
     padding: 5px 10px;
     border-radius: 10px;
     cursor: pointer;
-    transition: .2s all ease-in-out;
+    transition: 0.2s all ease-in-out;
     user-select: none;
 }
 
 .avatar:hover {
     background-color: #3e3e3e;
-    transition: .2s all ease-in-out;
+    transition: 0.2s all ease-in-out;
 }
 
 .avatar img {
