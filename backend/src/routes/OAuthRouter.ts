@@ -37,6 +37,7 @@ router.get("/", async (req: Request, res: Response) => {
                 data: {
                     username: "Cold",
                     discordId: "123",
+                    avatar: "https://duckduckgo.com/i/f49ef561.png",
                 },
             });
 
@@ -164,6 +165,7 @@ router.get("/", async (req: Request, res: Response) => {
             },
             data: {
                 username: user.username,
+                avatar: `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`,
             },
         });
 
