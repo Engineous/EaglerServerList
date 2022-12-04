@@ -4,7 +4,7 @@ class API {
     async request({ endpoint, method, body, headers }) {
         return new Promise((resolve, reject) => {
             Axios({
-                url: `http://localhost:3001${endpoint}`,
+                url: `${process.env.NEXT_PUBLIC_BACKEND_URI}${endpoint}`,
                 method: method ?? "GET",
                 data: body ?? null,
                 headers,

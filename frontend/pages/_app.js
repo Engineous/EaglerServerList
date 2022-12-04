@@ -16,7 +16,7 @@ const App = ({ Component, pageProps }) => {
             .catch(() => setUser(null));
 
         setTimeout(() => setLoading(false), 500);
-    }, [user]);
+    }, []);
 
     return loading ? (
         <Loading />
