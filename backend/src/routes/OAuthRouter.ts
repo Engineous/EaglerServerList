@@ -140,12 +140,12 @@ router.get("/", async (req: Request, res: Response) => {
             discordId: user.id,
         },
     });
-
     if (!lookup)
         lookup = await prisma.user.create({
             data: {
                 discordId: user.id,
                 username: user.username,
+                avatar: `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`,
             },
         });
 
