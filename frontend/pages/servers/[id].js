@@ -6,6 +6,7 @@ import { AiFillLike, AiFillDislike } from "react-icons/ai";
 import { CircularProgress } from "@mui/material";
 import { InnerLoading } from "../../components/loading";
 import { GoVerified } from "react-icons/go";
+import { useNotification } from "../../components/notification";
 import Head from "next/head";
 import styles from "../../styles/Server.module.css";
 import Navbar from "../../components/navbar";
@@ -25,6 +26,7 @@ export default function ServerInfo() {
     const [loading, setLoading] = useState(true);
     const { user } = useUser();
     const router = useRouter();
+    const notify = useNotification();
     const { id } = router.query;
 
     const postComment = async () => {
@@ -42,15 +44,29 @@ export default function ServerInfo() {
                     ...serverInfo,
                     comments: [...serverInfo.comments, data.data],
                 });
+                notify({
+                    type: "success",
+                    content: "Successfully posted comment.",
+                });
             }
         } catch (err) {
-            alert(`Error: ${err}`);
+            if (!err.repsonse || !err.response.data || !err.response.data.message)
+                notify({
+                    type: "error",
+                    content: "An unknown error occurred.",
+                });
+            else
+                notify({
+                    type: "error",
+                    content: err.response.data.message,
+                });
         }
         setPostingComment(false);
         setCommentContent("");
     };
 
     const handleVote = (value) => {
+        // TODO: implement voting
         setCaptcha(null);
         window.grecaptcha.reset();
         setVoting(true);
@@ -61,18 +77,6 @@ export default function ServerInfo() {
         api.getServer(id)
             .then((data) => {
                 setServerInfo(data.data);
-                /**
-                 * The code below is made redundant by a recent backend
-                 * change.
-                 */
-                // api.getSpecificUser(data.data.owner)
-                //     .then((userData) => {
-                //         setUserInfo(userData.data);
-                //         setLoading(false);
-                //     })
-                //     .catch(() => {
-                //         setLoading(false);
-                //     });
                 setLoading(false);
             })
             .catch(() => setLoading(false));

@@ -5,6 +5,7 @@ import "../styles/globals.css";
 import api from "../api";
 import { createTheme } from "@mui/material";
 import { ThemeProvider } from "@emotion/react";
+import NotificationProvider from "../components/notification";
 
 const App = ({ Component, pageProps }) => {
     const [user, setUser] = useState(null);
@@ -34,7 +35,9 @@ const App = ({ Component, pageProps }) => {
     ) : (
         <UserProvider value={{ user, setUser }}>
             <ThemeProvider theme={theme}>
-                <Component {...pageProps} />
+                <NotificationProvider>
+                    <Component {...pageProps} />
+                </NotificationProvider>
             </ThemeProvider>
         </UserProvider>
     );
