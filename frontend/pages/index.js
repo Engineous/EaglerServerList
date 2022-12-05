@@ -3,6 +3,7 @@ import styles from "../styles/Home.module.css";
 import Navbar from "../components/navbar";
 import { useUser } from "../components/user";
 import { useEffect, useState } from "react";
+import { GoVerified } from "react-icons/go";
 import api from "../api";
 import { CircularProgress } from "@mui/material";
 
@@ -50,7 +51,7 @@ export default function Home() {
                 <>
                     {serversInfo.map((server)=> (
                         <div class={styles.box}>
-                            <h2 className={styles.center}>{server.name}</h2>
+                            <h2 className={styles.boxcenter}>{server.name} {server.verified && <GoVerified />}</h2>
                         </div>
                     ))}
                 </>
