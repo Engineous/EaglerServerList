@@ -1,14 +1,20 @@
 import Head from "next/head";
 import styles from "../../styles/Home.module.css";
 import Navbar from "../../components/navbar";
+import Button from "../../components/button";
 import { useUser } from "../../components/user";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import Timestamp from "react-timestamp"
 import api from "../../api";
+import Link from "next/link";
+import { MdOutlineReply } from "react-icons/md";
 import { CircularProgress } from "@mui/material";
+import { style } from "@mui/system";
 
 export default function ServerInfo() {
     const [serverInfo, setServerInfo] = useState(null);
+    const [userInfo, setUserInfo] = useState(null);
     const [loading, setLoading] = useState(true);
     const { user } = useUser();
     const router = useRouter();
@@ -19,11 +25,21 @@ export default function ServerInfo() {
         api.getServer(id)
             .then((data) => {
                 setServerInfo(data.data);
-                setLoading(false);
+                api.getSpecificUser(data.data.owner).then((userData) => {
+                    setUserInfo(userData.data);
+                    setLoading(false);
+                })
+                .catch(() => {
+                    setLoading(false);
+                })
             })
             .catch(() => setLoading(false));
     }, [user]);
-
+    const openReplyBox = event => {
+        event.preventDefault();
+        const replyBox = document.getElementById("replyBox");
+        replyBox.style.display = "block";
+    }
     return (
         <>
             <Head>
@@ -65,9 +81,46 @@ export default function ServerInfo() {
                 ) : (
                     <>
                         {serverInfo ? (
-                            <h1>{serverInfo.name}</h1>
+                            <>
+                                <div className={styles.center}>
+                                    <h1 className={styles.title}>{serverInfo.name}</h1>
+                                    <p style={{ fontsize : "3px"}}>By: {loading ? <CircularProgress /> : userInfo ? userInfo.username : "Unknown User"}</p>
+                                    <br />
+                                    <p>IP: {serverInfo.address}</p>
+                                    <p>{serverInfo.description}</p>
+                                    <br />
+                                </div>
+                                <div className={styles.comments}>
+                                    <form>
+                                        <textarea className={styles.txtarea}></textarea>
+                                    </form>
+                                    {serverInfo.comments.map((comment) => (
+                                        <>
+                                            <div className={styles.box}>
+                                                <div>
+                                                    <p className={styles.poster}><img style={{width:"35px", height:"auto"}} src={comment.poster.avatar} />{comment.poster.username} <Timestamp style={{color:"#535353", marginLeft:"5px"}} relative date={comment.postedAt} /></p><br /> {/* TODO: Make username a link! */}
+                                                </div>
+                                                    <p className={styles.comment}>{comment.content}</p>
+                                                </div>
+                                            <br />
+                                        </>
+                                    ))}
+                                    {serverInfo.comments.length < 1 && <p>No comments</p>}
+                                </div>
+                            </>
+                            
                         ) : (
-                            <h1>A server with this ID could not be found.</h1>
+                            <div style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                width: "100vw",
+                                height: "calc(100vh - 60px)",
+                            }}>
+                                <h1>A server with this ID could not be found.</h1>
+                                <Link href="/" style={{ color: "#fb8464" }}>Go Home?</Link>
+                            </div>
                         )}
                     </>
                 )}

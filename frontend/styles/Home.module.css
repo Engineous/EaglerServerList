@@ -2,3 +2,60 @@
     margin: 0;
     padding: 0;
 }
+.title{
+    text-align:center;
+    padding-top: 20px;
+}
+.center{
+    text-align:center;
+}
+.comments{
+    margin:20px;
+}
+.box {
+    background-color: #272727;
+    border-radius: 6px;
+    box-shadow: 0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0 0 1px rgb(10 10 10 / 2%);
+    color: white;
+    display: block;
+    padding: 1.25rem;
+}
+.avatar {
+    margin: 0 10px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background-color: #1e1e1e;
+    padding: 5px 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.2s all ease-in-out;
+}
+.poster > img {
+    max-width: 35px;
+    max-height: 35px;
+    border-radius: 30px;
+}
+.poster{
+    display: flex;
+    flex-direction: row;
+    gap:5px;
+    font-size: 17px;
+    align-items: center;
+}
+.txtarea{
+    width: 20%;
+    height: auto;
+    border-radius: 5px;
+    border-left: inherit;
+    border-right: inherit;
+    border-top: inherit;
+    border-radius: 0%;
+    background-color: #1e1e1e;
+    padding: 10px;
+    resize: none;
+}
+.txtarea:focus{
+    border-color: transparent;
+}
