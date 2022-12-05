@@ -11,6 +11,22 @@
     justify-content: center;
     gap: 5px;
 }
+.ownerAvatar {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+.ownerAvatar img {
+    max-width: 24px;
+    height: auto;
+    border-radius: 24px;
+}
+.ownerAvatar a {
+    font-weight: 500;
+    color: #fb8464;
+}
 .center {
     text-align: center;
 }

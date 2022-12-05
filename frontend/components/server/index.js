@@ -13,6 +13,7 @@ const Server = ({ server }) => {
                 {server.name}{" "}
                 {server.approved && <GoVerified color="#fb8464" />}
             </h2>
+            <h3>IP: {server.address}</h3>
             <p>(PLACEHOLDER MOTD)</p>
             <div className={styles.buttonContainer}>
                 <Button
@@ -25,6 +26,6 @@ const Server = ({ server }) => {
             </div>
         </div>
     );
-}
+};
 
 export default Server;

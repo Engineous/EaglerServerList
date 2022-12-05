@@ -8,6 +8,7 @@ import Button from "../button";
 import { FaDiscord } from "react-icons/fa";
 import { useState } from "react";
 import { Menu, MenuItem } from "@mui/material";
+import api from "../../api";
 
 const Avatar = () => {
     const [anchorEl, setAnchorEl] = useState(null);
@@ -29,10 +30,9 @@ const Avatar = () => {
             </div>
             <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
                 <MenuItem
-                    onClick={() => {
+                    onClick={async () => {
                         handleClose();
-                        document.cookie =
-                            "session=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;";
+                        await api.logout().catch(() => router.reload());
                         router.reload();
                     }}
                 >

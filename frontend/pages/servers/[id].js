@@ -15,27 +15,49 @@ import CommentBox from "../../components/commentBox";
 import Comment from "../../components/comment";
 import { InnerLoading } from "../../components/loading";
 import { GoVerified } from "react-icons/go";
+import ReCAPTCHA from "react-google-recaptcha";
 
 export default function ServerInfo() {
     const [serverInfo, setServerInfo] = useState(null);
     const [commentContent, setCommentContent] = useState("");
     const [postingComment, setPostingComment] = useState(false);
+    const [captcha, setCaptcha] = useState(null);
     const [voting, setVoting] = useState(false);
     const [loading, setLoading] = useState(true);
     const { user } = useUser();
     const router = useRouter();
     const { id } = router.query;
 
-    const postComment = () => {
-        setCommentContent("");
+    const postComment = async () => {
+        window.grecaptcha.reset();
         setPostingComment(true);
-        setTimeout(() => setPostingComment(false), 1000);
+        try {
+            const data = await api.postComment({
+                uuid: serverInfo.uuid,
+                content: commentContent,
+                captcha,
+            });
+            if (data.success) {
+                setServerInfo({
+                    ...serverInfo,
+                    comments: [
+                        ...serverInfo.comments,
+                        data.data,
+                    ],
+                });
+            }
+        } catch (err) {
+            alert(`Error: ${err}`);
+        }
+        setPostingComment(false);
+        setCommentContent("");
     };
 
     const handleVote = (value) => {
+        window.grecaptcha.reset();
         setVoting(true);
         setTimeout(() => setVoting(false), 1000);
-    }
+    };
 
     useEffect(() => {
         api.getServer(id)
@@ -72,13 +94,17 @@ export default function ServerInfo() {
                 <meta
                     property="og:description"
                     content={
-                        serverInfo ? `View information about ${serverInfo.user.username}'s server.` : "Unknown Server"
+                        serverInfo
+                            ? `View information about ${serverInfo.user.username}'s server.`
+                            : "Unknown Server"
                     }
                 />
                 <meta
                     property="twitter:description"
                     content={
-                        serverInfo ? `View information about ${serverInfo.user.username}'s server.` : "Unknown Server"
+                        serverInfo
+                            ? `View information about ${serverInfo.user.username}'s server.`
+                            : "Unknown Server"
                     }
                 />
                 <meta property="theme-color" content="#FB8464" />
@@ -101,11 +127,22 @@ export default function ServerInfo() {
                             <>
                                 <div className={styles.center}>
                                     <h1 className={styles.title}>
-                                        {serverInfo.name}{" "}{serverInfo.approved && <GoVerified color="#fb8464" />}
+                                        {serverInfo.name}{" "}
+                                        {serverInfo.approved && (
+                                            <GoVerified
+                                                color="#fb8464"
+                                                size={24}
+                                            />
+                                        )}
                                     </h1>
-                                    <p style={{ fontsize: "5px" }}>
-                                        By: {serverInfo.user.username}
-                                    </p>
+                                    <div className={styles.ownerAvatar}>
+                                        <img src={serverInfo.user.avatar} />
+                                        <Link
+                                            href={`/users/${serverInfo.user.uuid}`}
+                                        >
+                                            {serverInfo.user.username}
+                                        </Link>
+                                    </div>
                                     <br />
                                     <p>IP: {serverInfo.address}</p>
                                     <p>{serverInfo.description}</p>
@@ -121,32 +158,47 @@ export default function ServerInfo() {
                                                 margin: "0 0 10px 0",
                                             }}
                                         >
-                                            
-                                            <div style={{
-                                                display: "flex",
-                                                flexDirection: "row",
-                                                alignItems: "center",
-                                                justifyContent: "center",
-                                                margin: "0 0 10px 0",
-                                                gap: "10px",
-                                            }}>
+                                            <div
+                                                style={{
+                                                    display: "flex",
+                                                    flexDirection: "row",
+                                                    alignItems: "center",
+                                                    justifyContent: "center",
+                                                    margin: "0 0 10px 0",
+                                                    gap: "10px",
+                                                }}
+                                            >
                                                 {voting ? (
-                                                    <CircularProgress size={39} />
+                                                    <CircularProgress
+                                                        size={39}
+                                                    />
                                                 ) : (
                                                     <>
                                                         <Button
                                                             color="#0e0e0e"
                                                             iconColor="#fb8464"
-                                                            icon={<AiFillLike />}
-                                                            onClick={() => handleVote(true)}
+                                                            icon={
+                                                                <AiFillLike />
+                                                            }
+                                                            onClick={() =>
+                                                                handleVote(true)
+                                                            }
+                                                            disabled={!captcha}
                                                         >
                                                             Upvote
                                                         </Button>
                                                         <Button
                                                             color="#0e0e0e"
                                                             iconColor="#fb8464"
-                                                            icon={<AiFillDislike />}
-                                                            onClick={() => handleVote(false)}
+                                                            icon={
+                                                                <AiFillDislike />
+                                                            }
+                                                            onClick={() =>
+                                                                handleVote(
+                                                                    false
+                                                                )
+                                                            }
+                                                            disabled={!captcha}
                                                         >
                                                             Downvote
                                                         </Button>
@@ -167,12 +219,22 @@ export default function ServerInfo() {
                                                     color="#0e0e0e"
                                                     onClick={postComment}
                                                     disabled={
-                                                        commentContent == ""
+                                                        commentContent == "" ||
+                                                        !captcha
                                                     }
                                                 >
                                                     Post
                                                 </Button>
                                             )}
+                                            <div style={{ margin: "5px 0" }} />
+                                            <ReCAPTCHA
+                                                sitekey={
+                                                    process.env
+                                                        .NEXT_PUBLIC_RECAPTCHA_SITE_KEY
+                                                }
+                                                onChange={setCaptcha}
+                                                theme="dark"
+                                            />
                                         </div>
                                     ) : (
                                         <div>

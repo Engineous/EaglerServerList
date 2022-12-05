@@ -3,7 +3,15 @@ import { CircularProgress } from "@mui/material";
 import { createTheme } from "@mui/system";
 import styles from "./Button.module.css";
 
-const Button = ({ color, icon, iconColor, children, onClick, disabled, style }) => {
+const Button = ({
+    color,
+    icon,
+    iconColor,
+    children,
+    onClick,
+    disabled,
+    style,
+}) => {
     const theme = createTheme({
         palette: {
             type: "dark",
@@ -33,10 +41,15 @@ const Button = ({ color, icon, iconColor, children, onClick, disabled, style }) 
             className={styles.button}
             onClick={onClick}
         >
-            <div className={styles.buttonIcon} style={{
-                color: iconColor ?? "#fff",
-                transition: "0.2s all ease-in-out",
-            }}>{icon}</div>
+            <div
+                className={styles.buttonIcon}
+                style={{
+                    color: iconColor ?? "#fff",
+                    transition: "0.2s all ease-in-out",
+                }}
+            >
+                {icon}
+            </div>
             {children}
         </button>
     );
