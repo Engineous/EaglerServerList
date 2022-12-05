@@ -37,6 +37,7 @@ router.get("/", async (req: Request, res: Response) => {
             uuid: true,
             name: true,
             verified: true,
+            approved: true,
             address: true,
             votes: true,
             tags: true,
