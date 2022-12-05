@@ -10,7 +10,8 @@ import api from "../../api";
 import Link from "next/link";
 import AddCommentIcon from "@mui/icons-material/AddComment";
 import { CircularProgress } from "@mui/material";
-import CommentBox from "../../components/comment";
+import CommentBox from "../../components/commentBox";
+import Comment from "../../components/comment";
 import { InnerLoading } from "../../components/loading";
 
 export default function ServerInfo() {
@@ -147,61 +148,10 @@ export default function ServerInfo() {
                                     )}
                                     {serverInfo.comments.map(
                                         (comment, index) => (
-                                            <>
-                                                <div
-                                                    className={styles.box}
-                                                    key={index}
-                                                >
-                                                    <div>
-                                                        <p
-                                                            className={
-                                                                styles.poster
-                                                            }
-                                                        >
-                                                            <img
-                                                                style={{
-                                                                    width: "35px",
-                                                                    height: "auto",
-                                                                }}
-                                                                src={
-                                                                    comment
-                                                                        .poster
-                                                                        .avatar
-                                                                }
-                                                            />
-                                                            <Link
-                                                                href={`/users/${comment.poster.uuid}`}
-                                                            >
-                                                                {
-                                                                    comment
-                                                                        .poster
-                                                                        .username
-                                                                }
-                                                            </Link>{" "}
-                                                            <Timestamp
-                                                                style={{
-                                                                    color: "#535353",
-                                                                    marginLeft:
-                                                                        "5px",
-                                                                }}
-                                                                relative
-                                                                date={
-                                                                    comment.postedAt
-                                                                }
-                                                            />
-                                                        </p>
-                                                        <br />{" "}
-                                                    </div>
-                                                    <p
-                                                        className={
-                                                            styles.comment
-                                                        }
-                                                    >
-                                                        {comment.content}
-                                                    </p>
-                                                </div>
-                                                <br />
-                                            </>
+                                            <Comment
+                                                comment={comment}
+                                                key={index}
+                                            />
                                         )
                                     )}
                                     {serverInfo.comments.length < 1 && (

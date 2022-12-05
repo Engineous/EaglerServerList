@@ -1,34 +1,33 @@
-import styles from "./Input.module.css";
+import Link from "next/link";
+import Timestamp from "react-timestamp";
+import styles from "./Comment.module.css";
 
-const Input = ({ value, startIcon, placeholder, onChange, type }) => (
-    <div className={styles.inputContainer}>
-        {startIcon && <div className={styles.inputStartIcon}>{startIcon}</div>}
-        <div className={styles.input}>
-            <input
-                value={value}
-                type={type}
-                placeholder={placeholder}
-                onChange={(event) => onChange(event.target.value)}
-            />
-        </div>
-    </div>
-);
+const Comment = ({ comment }) => {
+    return (
+        <>
+            <div className={styles.box}>
+                <div>
+                    <div className={styles.poster}>
+                        <img src={comment.poster.avatar} />
+                        <Link href={`/users/${comment.poster.uuid}`}>
+                            {comment.poster.username}
+                        </Link>{" "}
+                        <Timestamp
+                            style={{
+                                color: "#535353",
+                                marginLeft: "5px",
+                            }}
+                            relative
+                            date={comment.postedAt}
+                        />
+                    </div>
+                    <br />{" "}
+                </div>
+                <p className={styles.comment}>{comment.content}</p>
+            </div>
+            <br />
+        </>
+    );
+};
 
-const CommentBox = ({ avatar, value, onChange }) => (
-    <div
-        style={{
-            margin: "10px 0",
-            width: "50vw",
-        }}
-    >
-        <Input
-            value={value}
-            type="text"
-            startIcon={<img src={avatar} />}
-            onChange={onChange}
-            placeholder="Type a comment..."
-        />
-    </div>
-);
-
-export default CommentBox;
+export default Comment;
