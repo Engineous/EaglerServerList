@@ -48,6 +48,7 @@ router.get("/", async (req: Request, res: Response) => {
             address: true,
             createdAt: true,
             disabled: true,
+            approved: true,
             verified: true,
             user: {
                 select: {
@@ -107,6 +108,7 @@ router.get("/full", User, async (req: Request, res: Response) => {
             createdAt: true,
             disabled: true,
             verified: true,
+            approved: true,
             owner: true,
             tags: true,
             updatedAt: true,
