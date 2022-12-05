@@ -5,6 +5,11 @@
 .title {
     text-align: center;
     padding-top: 20px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
 }
 .center {
     text-align: center;

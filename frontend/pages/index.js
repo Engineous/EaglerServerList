@@ -1,14 +1,12 @@
 import Head from "next/head";
 import styles from "../styles/Home.module.css";
 import Navbar from "../components/navbar";
-import { useUser } from "../components/user";
+import { InnerLoading } from "../components/loading";
 import { useEffect, useState } from "react";
-import { GoVerified } from "react-icons/go";
 import api from "../api";
-import { CircularProgress } from "@mui/material";
+import Server from "../components/server";
 
 export default function Home() {
-    const { user } = useUser();
     const [loading, setLoading] = useState(true);
     const [serversInfo, setServersInfo] = useState(null);
     useEffect(() => {
@@ -42,27 +40,24 @@ export default function Home() {
                 <meta property="og:type" content="website" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
-            <div className={styles.root} style={{ marginBottom: "20px" }}>
+            <div className={styles.root}>
                 <Navbar />
+                <h1>Servers</h1>
+                <p>View a list of available servers.</p>
+                {loading ? (
+                    <InnerLoading />
+                ) : (
+                    <>
+                        {serversInfo ? (
+                            serversInfo.map((server, index) => (
+                                <Server server={server} key={index} />
+                            ))
+                        ) : (
+                            <p>Failed to load servers</p>
+                        )}
+                    </>
+                )}
             </div>
-            {loading ? (
-                <CircularProgress />
-            ) : (
-                <>
-                    {serversInfo ? (
-                        serversInfo.map((server) => (
-                            <div class={styles.box}>
-                                <h2 className={styles.boxcenter}>
-                                    {server.name}{" "}
-                                    {server.verified && <GoVerified />}
-                                </h2>
-                            </div>
-                        ))
-                    ) : (
-                        <p>Failed to load servers</p>
-                    )}
-                </>
-            )}
         </>
     );
 }

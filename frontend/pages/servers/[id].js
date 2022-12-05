@@ -8,17 +8,19 @@ import { useRouter } from "next/router";
 import Timestamp from "react-timestamp";
 import api from "../../api";
 import Link from "next/link";
-import AddCommentIcon from "@mui/icons-material/AddComment";
+import { MdAddComment } from "react-icons/md";
+import { AiFillLike, AiFillDislike } from "react-icons/ai";
 import { CircularProgress } from "@mui/material";
 import CommentBox from "../../components/commentBox";
 import Comment from "../../components/comment";
 import { InnerLoading } from "../../components/loading";
+import { GoVerified } from "react-icons/go";
 
 export default function ServerInfo() {
     const [serverInfo, setServerInfo] = useState(null);
-    const [userInfo, setUserInfo] = useState(null);
     const [commentContent, setCommentContent] = useState("");
     const [postingComment, setPostingComment] = useState(false);
+    const [voting, setVoting] = useState(false);
     const [loading, setLoading] = useState(true);
     const { user } = useUser();
     const router = useRouter();
@@ -30,18 +32,28 @@ export default function ServerInfo() {
         setTimeout(() => setPostingComment(false), 1000);
     };
 
+    const handleVote = (value) => {
+        setVoting(true);
+        setTimeout(() => setVoting(false), 1000);
+    }
+
     useEffect(() => {
         api.getServer(id)
             .then((data) => {
                 setServerInfo(data.data);
-                api.getSpecificUser(data.data.owner)
-                    .then((userData) => {
-                        setUserInfo(userData.data);
-                        setLoading(false);
-                    })
-                    .catch(() => {
-                        setLoading(false);
-                    });
+                /**
+                 * The code below is made redundant by a recent backend
+                 * change.
+                 */
+                // api.getSpecificUser(data.data.owner)
+                //     .then((userData) => {
+                //         setUserInfo(userData.data);
+                //         setLoading(false);
+                //     })
+                //     .catch(() => {
+                //         setLoading(false);
+                //     });
+                setLoading(false);
             })
             .catch(() => setLoading(false));
     }, [user]);
@@ -60,13 +72,13 @@ export default function ServerInfo() {
                 <meta
                     property="og:description"
                     content={
-                        serverInfo ? serverInfo.description : "Unknown Server"
+                        serverInfo ? `View information about ${serverInfo.user.username}'s server.` : "Unknown Server"
                     }
                 />
                 <meta
                     property="twitter:description"
                     content={
-                        serverInfo ? serverInfo.description : "Unknown Server"
+                        serverInfo ? `View information about ${serverInfo.user.username}'s server.` : "Unknown Server"
                     }
                 />
                 <meta property="theme-color" content="#FB8464" />
@@ -89,22 +101,14 @@ export default function ServerInfo() {
                             <>
                                 <div className={styles.center}>
                                     <h1 className={styles.title}>
-                                        {serverInfo.name}
+                                        {serverInfo.name}{" "}{serverInfo.approved && <GoVerified color="#fb8464" />}
                                     </h1>
                                     <p style={{ fontsize: "5px" }}>
-                                        By:{" "}
-                                        {loading ? (
-                                            <CircularProgress />
-                                        ) : userInfo ? (
-                                            userInfo.username
-                                        ) : (
-                                            "Unknown User"
-                                        )}
+                                        By: {serverInfo.user.username}
                                     </p>
                                     <br />
                                     <p>IP: {serverInfo.address}</p>
                                     <p>{serverInfo.description}</p>
-                                    <br />
                                 </div>
                                 <div className={styles.comments}>
                                     {user ? (
@@ -117,17 +121,50 @@ export default function ServerInfo() {
                                                 margin: "0 0 10px 0",
                                             }}
                                         >
+                                            
+                                            <div style={{
+                                                display: "flex",
+                                                flexDirection: "row",
+                                                alignItems: "center",
+                                                justifyContent: "center",
+                                                margin: "0 0 10px 0",
+                                                gap: "10px",
+                                            }}>
+                                                {voting ? (
+                                                    <CircularProgress size={39} />
+                                                ) : (
+                                                    <>
+                                                        <Button
+                                                            color="#0e0e0e"
+                                                            iconColor="#fb8464"
+                                                            icon={<AiFillLike />}
+                                                            onClick={() => handleVote(true)}
+                                                        >
+                                                            Upvote
+                                                        </Button>
+                                                        <Button
+                                                            color="#0e0e0e"
+                                                            iconColor="#fb8464"
+                                                            icon={<AiFillDislike />}
+                                                            onClick={() => handleVote(false)}
+                                                        >
+                                                            Downvote
+                                                        </Button>
+                                                    </>
+                                                )}
+                                            </div>
                                             <CommentBox
                                                 avatar={user.avatar}
                                                 onChange={setCommentContent}
                                                 value={commentContent}
                                             />
                                             {postingComment ? (
-                                                <CircularProgress size={40} />
+                                                <CircularProgress size={39} />
                                             ) : (
                                                 <Button
-                                                    icon={<AddCommentIcon />}
-                                                    color="#fb8464"
+                                                    icon={<MdAddComment />}
+                                                    iconColor="#fb8464"
+                                                    color="#0e0e0e"
                                                     onClick={postComment}
                                                     disabled={
                                                         commentContent == ""
