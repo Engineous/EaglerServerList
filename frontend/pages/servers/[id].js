@@ -92,7 +92,7 @@ export default function ServerInfo() {
                                 </div>
                                 <div className={styles.comments}>
                                     <form>
-                                        <textarea className={styles.txtarea}></textarea>
+                                        <input placeholder="Type a comment here..." className={styles.txtarea}></input>
                                     </form>
                                     {serverInfo.comments.map((comment) => (
                                         <>

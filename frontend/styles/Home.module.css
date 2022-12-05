@@ -47,7 +47,7 @@
 .txtarea{
     width: 20%;
     height: auto;
-    border-radius: 5px;
+    border-width:3px;
     border-left: inherit;
     border-right: inherit;
     border-top: inherit;
@@ -55,7 +55,8 @@
     background-color: #1e1e1e;
     padding: 10px;
     resize: none;
+    margin-bottom:20px;
 }
 .txtarea:focus{
-    border-color: transparent;
+    outline: none;
 }
