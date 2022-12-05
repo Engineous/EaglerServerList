@@ -17,20 +17,16 @@ const NotificationProvider = ({ children }) => {
         }
     }, []);
 
-    return <NotificationContext.Provider value={dispatch}>
+    return (
+        <NotificationContext.Provider value={dispatch}>
             <div className={styles.notificationWrapper}>
-                {state.map((note) =>(
-                        <Notification
-                            dispatch={dispatch}
-                            key={note.id}
-                            {...note}
-                        />
-                    )
-                )}
+                {state.map((note) => (
+                    <Notification dispatch={dispatch} key={note.id} {...note} />
+                ))}
             </div>
             {children}
         </NotificationContext.Provider>
-    ;
+    );
 };
 
 export const useNotification = () => {

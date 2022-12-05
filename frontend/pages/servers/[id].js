@@ -50,7 +50,11 @@ export default function ServerInfo() {
                 });
             }
         } catch (err) {
-            if (!err.repsonse || !err.response.data || !err.response.data.message)
+            if (
+                !err.repsonse ||
+                !err.response.data ||
+                !err.response.data.message
+            )
                 notify({
                     type: "error",
                     content: "An unknown error occurred.",
