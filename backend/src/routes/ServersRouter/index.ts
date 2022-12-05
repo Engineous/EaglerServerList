@@ -40,6 +40,13 @@ router.get("/", async (req: Request, res: Response) => {
             address: true,
             votes: true,
             tags: true,
+            user: {
+                select: {
+                    uuid: true,
+                    username: true,
+                    avatar: true,
+                },
+            },
         },
         orderBy: {
             votes: "desc",

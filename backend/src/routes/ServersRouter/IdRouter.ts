@@ -49,7 +49,13 @@ router.get("/", async (req: Request, res: Response) => {
             createdAt: true,
             disabled: true,
             verified: true,
-            owner: true,
+            user: {
+                select: {
+                    uuid: true,
+                    username: true,
+                    avatar: true,
+                },
+            },
             tags: true,
             updatedAt: true,
             votes: true,
@@ -114,7 +120,7 @@ router.get("/full", User, async (req: Request, res: Response) => {
             success: false,
             message: "Could not find a server with that UUID.",
         });
-    
+
     if (server.owner !== req.user.uuid && !req.user.admin) {
         return res.status(403).json({
             success: false,
