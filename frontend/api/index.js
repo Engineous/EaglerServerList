@@ -20,10 +20,10 @@ class API {
             endpoint: "/users/@me",
         });
     }
-    async getSpecificUser(uuid){
+    async getSpecificUser(uuid) {
         return await this.request({
-            endpoint: `/users/${uuid}`
-        })
+            endpoint: `/users/${uuid}`,
+        });
     }
 
     async getServer(uuid) {
@@ -37,17 +37,16 @@ class API {
             endpoint: `/servers?page=${page}`,
         });
     }
-    async submitForm(uuid, content){
-        try{
+    async submitForm(uuid, content) {
+        try {
             return await this.request({
                 endpoint: `/servers/${uuid}`,
                 method: "POST",
                 data: JSON.stringify(content),
-            })
-        }catch(err){
-            return "Unable to submit form"
+            });
+        } catch (err) {
+            return "Unable to submit form";
         }
-
     }
 }
 

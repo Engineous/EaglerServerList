@@ -23,4 +23,13 @@ const Loading = () => {
     );
 };
 
-export default Loading;
+const InnerLoading = () => {
+    return (
+        <div className={styles.innerRoot}>
+            <CircularProgress />
+            <h1>Loading...</h1>
+        </div>
+    );
+};
+
+export { Loading, InnerLoading };

@@ -2,20 +2,21 @@
     margin: 0;
     padding: 0;
 }
-.title{
-    text-align:center;
+.title {
+    text-align: center;
     padding-top: 20px;
 }
-.center{
-    text-align:center;
+.center {
+    text-align: center;
 }
-.comments{
-    margin:20px;
+.comments {
+    margin: 20px;
 }
 .box {
     background-color: #272727;
     border-radius: 6px;
-    box-shadow: 0 0.5em 1em -0.125em rgb(10 10 10 / 10%), 0 0 0 1px rgb(10 10 10 / 2%);
+    box-shadow: 0 0.5em 1em -0.125em rgb(10 10 10 / 10%),
+        0 0 0 1px rgb(10 10 10 / 2%);
     color: white;
     display: block;
     padding: 1.25rem;
@@ -37,17 +38,17 @@
     max-height: 35px;
     border-radius: 30px;
 }
-.poster{
+.poster {
     display: flex;
     flex-direction: row;
-    gap:5px;
+    gap: 5px;
     font-size: 17px;
     align-items: center;
 }
-.txtarea{
+.txtarea {
     width: 350px;
     height: auto;
-    border-width:3px;
+    border-width: 3px;
     border-left: inherit;
     border-right: inherit;
     border-top: inherit;
@@ -55,24 +56,24 @@
     background-color: #1e1e1e;
     padding: 10px;
     resize: none;
-    margin-bottom:20px;
+    margin-bottom: 20px;
 }
-.txtarea:focus{
+.txtarea:focus {
     outline: none;
 }
-.commentInput > img{
+.commentInput > img {
     max-width: 35px;
     max-height: 35px;
     border-radius: 30px;
-    margin-bottom:20px;
+    margin-bottom: 20px;
 }
-.commentInput > Button{
-    margin-bottom:20px;
+.commentInput > Button {
+    margin-bottom: 20px;
 }
-.commentInput{
+.commentInput {
     display: flex;
     flex-direction: row;
-    gap:13px;
+    gap: 13px;
     font-size: 17px;
     align-items: center;
 }

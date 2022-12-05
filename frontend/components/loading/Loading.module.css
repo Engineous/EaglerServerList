@@ -12,3 +12,18 @@
     font-size: 1.3em;
     font-weight: 400;
 }
+
+.innerRoot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    height: calc(100vh - 60px);
+    gap: 10px;
+}
+
+.innerRoot h1 {
+    font-size: 1.3em;
+    font-weight: 400;
+}

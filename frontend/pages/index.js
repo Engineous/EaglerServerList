@@ -18,7 +18,7 @@ export default function Home() {
                 setLoading(false);
             })
             .catch(() => setLoading(false));
-    });
+    }, []);
 
     return (
         <>
@@ -42,18 +42,25 @@ export default function Home() {
                 <meta property="og:type" content="website" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
-            <div className={styles.root} style={{marginBottom:"20px"}}>
+            <div className={styles.root} style={{ marginBottom: "20px" }}>
                 <Navbar />
             </div>
             {loading ? (
                 <CircularProgress />
             ) : (
                 <>
-                    {serversInfo.map((server)=> (
-                        <div class={styles.box}>
-                            <h2 className={styles.boxcenter}>{server.name} {server.verified && <GoVerified />}</h2>
-                        </div>
-                    ))}
+                    {serversInfo ? (
+                        serversInfo.map((server) => (
+                            <div class={styles.box}>
+                                <h2 className={styles.boxcenter}>
+                                    {server.name}{" "}
+                                    {server.verified && <GoVerified />}
+                                </h2>
+                            </div>
+                        ))
+                    ) : (
+                        <p>Failed to load servers</p>
+                    )}
                 </>
             )}
         </>

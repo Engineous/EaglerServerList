@@ -17,8 +17,8 @@ const Error404 = () => (
             <h1>Oops!</h1>
             <p>
                 Looks like you took a wrong turn.{" "}
-                <Link href="/" style={{ color: "#fb8464" }}>
-                    Go home?
+                <Link href="/">
+                    <span>Go home?</span>
                 </Link>
             </p>
         </div>

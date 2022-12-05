@@ -30,3 +30,25 @@
     box-shadow: inset 0 0 0 10em rgba(0, 0, 0, 0.3);
     transition: 0.2s all ease-in-out;
 }
+
+.disabledButton {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    font-family: Poppins;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: 0.2s all ease-in-out;
+}
+
+.disabledButton svg {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
