@@ -188,17 +188,29 @@ router.post(
             });
         }
 
-        await prisma.comment.create({
+        const comment = await prisma.comment.create({
             data: {
                 content,
                 serverId: server.uuid,
                 posterId: req.user.uuid,
+            },
+            select: {
+                poster: {
+                    select: {
+                        uuid: true,
+                        username: true,
+                        avatar: true,
+                    },
+                },
+                content: true,
+                postedAt: true,
             },
         });
 
         return res.json({
             success: true,
             message: "Comment successfully posted.",
+            data: comment,
         });
     }
 );

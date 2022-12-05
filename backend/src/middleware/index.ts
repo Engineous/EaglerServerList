@@ -95,6 +95,7 @@ const User = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     req.user = user;
+    req.session = session;
     return next();
 };
 
@@ -155,6 +156,7 @@ const Admin = async (req: Request, res: Response, next: NextFunction) => {
         });
 
     req.user = user;
+    req.session = session;
     return next();
 };
 

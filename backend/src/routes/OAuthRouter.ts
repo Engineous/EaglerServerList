@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express";
 import prisma from "../db";
 import axios from "axios";
 import { daysFromNow, randomString } from "../utils";
+import { User } from "../middleware";
 
 const router = Router();
 
@@ -213,6 +214,21 @@ router.get("/", async (req: Request, res: Response) => {
                 message: `An internal error occurred with ID ${s}.`,
             });
         });
+});
+
+router.get("/logout", User, async (req: Request, res: Response) => {
+    await prisma.session.delete({
+        where: {
+            sessionString: req.session.sessionString,
+        },
+    });
+
+    res.clearCookie("session");
+
+    return res.json({
+        success: true,
+        message: "Successfully logged out.",
+    });
 });
 
 export default router;
