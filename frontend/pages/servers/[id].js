@@ -244,14 +244,17 @@ export default function ServerInfo() {
                                             <br />
                                         </div>
                                     )}
-                                    {serverInfo.comments.map(
-                                        (comment, index) => (
+                                    {[]
+                                        .concat(serverInfo.comments)
+                                        .sort((a, b) =>
+                                            a.postedAt < b.postedAt ? 1 : -1
+                                        )
+                                        .map((comment, index) => (
                                             <Comment
                                                 comment={comment}
                                                 key={index}
                                             />
-                                        )
-                                    )}
+                                        ))}
                                     {serverInfo.comments.length < 1 && (
                                         <p className={styles.center}>
                                             No comments
