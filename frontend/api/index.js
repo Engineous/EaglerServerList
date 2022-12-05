@@ -37,6 +37,18 @@ class API {
             endpoint: `/servers?page=${page}`,
         });
     }
+    async submitForm(uuid, content){
+        try{
+            return await this.request({
+                endpoint: `/servers/${uuid}`,
+                method: "POST",
+                data: JSON.stringify(content),
+            })
+        }catch(err){
+            return "Unable to submit form"
+        }
+
+    }
 }
 
 export default new API();

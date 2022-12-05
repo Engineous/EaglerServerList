@@ -9,6 +9,7 @@ import Timestamp from "react-timestamp"
 import api from "../../api";
 import Link from "next/link";
 import { MdOutlineReply } from "react-icons/md";
+import { BiCommentAdd } from "react-icons/bi";
 import { CircularProgress } from "@mui/material";
 import { style } from "@mui/system";
 
@@ -35,11 +36,6 @@ export default function ServerInfo() {
             })
             .catch(() => setLoading(false));
     }, [user]);
-    const openReplyBox = event => {
-        event.preventDefault();
-        const replyBox = document.getElementById("replyBox");
-        replyBox.style.display = "block";
-    }
     return (
         <>
             <Head>
@@ -84,19 +80,20 @@ export default function ServerInfo() {
                             <>
                                 <div className={styles.center}>
                                     <h1 className={styles.title}>{serverInfo.name}</h1>
-                                    <p style={{ fontsize : "3px"}}>By: {loading ? <CircularProgress /> : userInfo ? userInfo.username : "Unknown User"}</p>
+                                    <p style={{ fontsize : "5px"}}>By: {loading ? <CircularProgress /> : userInfo ? userInfo.username : "Unknown User"}</p>
                                     <br />
                                     <p>IP: {serverInfo.address}</p>
                                     <p>{serverInfo.description}</p>
                                     <br />
                                 </div>
                                 <div className={styles.comments}>
-                                    <form>
-                                        <input placeholder="Type a comment here..." className={styles.txtarea}></input>
-                                    </form>
-                                    {serverInfo.comments.map((comment) => (
+                                    <div className={styles.commentInput}>
+                                        <img style={{width:"40px", height:"auto"}} src={user.avatar} /><textarea id="commentContent" placeholder="Type a comment here..." className={styles.txtarea}></textarea>
+                                        <Button id="commentBtn" color="#1e1e1e" icon={<BiCommentAdd/>} onClick={() => {api.submitForm(serverInfo.uuid, document.getElementById("commentContent").value)}}>Comment</Button>
+                                    </div>
+                                    {serverInfo.comments.map((comment, index) => (
                                         <>
-                                            <div className={styles.box}>
+                                            <div className={styles.box} key={index}>
                                                 <div>
                                                     <p className={styles.poster}><img style={{width:"35px", height:"auto"}} src={comment.poster.avatar} />{comment.poster.username} <Timestamp style={{color:"#535353", marginLeft:"5px"}} relative date={comment.postedAt} /></p><br /> {/* TODO: Make username a link! */}
                                                 </div>
@@ -105,7 +102,7 @@ export default function ServerInfo() {
                                             <br />
                                         </>
                                     ))}
-                                    {serverInfo.comments.length < 1 && <p>No comments</p>}
+                                    {serverInfo.comments.length < 1 && <p className={styles.center}>No comments</p>}
                                 </div>
                             </>
                             
