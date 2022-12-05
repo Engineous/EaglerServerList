@@ -25,7 +25,7 @@ const Button = ({
         <button
             style={{
                 ...style,
-                backgroundColor: "#606060",
+                backgroundColor: "#303030",
             }}
             className={styles.disabledButton}
         >

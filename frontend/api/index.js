@@ -45,7 +45,7 @@ class API {
     }
 
     async postComment({ uuid, content, captcha }) {
-        await this.request({
+        return await this.request({
             endpoint: `/servers/${uuid}`,
             method: "POST",
             body: {

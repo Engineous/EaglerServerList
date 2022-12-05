@@ -1,7 +1,7 @@
 .inputContainer {
     min-width: 300px;
     height: 40px;
-    border: 2px solid #606060;
+    border: 2px solid #303030;
     border-radius: 40px;
     display: flex;
     flex-direction: row;
@@ -12,7 +12,7 @@
 }
 
 .inputContainer:hover {
-    border: 2px solid #909090;
+    border: 2px solid #606060;
 }
 
 .inputContainer:focus {

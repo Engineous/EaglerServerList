@@ -40,6 +40,8 @@ export default function Servers() {
             </Head>
             <div className={styles.root}>
                 <Navbar />
+                <h1>Your Servers</h1>
+                <p>Manage the servers that you own.</p>
             </div>
         </>
     );

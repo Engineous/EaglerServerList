@@ -1,21 +1,20 @@
+import { useUser } from "../../components/user";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import { MdAddComment } from "react-icons/md";
+import { AiFillLike, AiFillDislike } from "react-icons/ai";
+import { CircularProgress } from "@mui/material";
+import { InnerLoading } from "../../components/loading";
+import { GoVerified } from "react-icons/go";
 import Head from "next/head";
 import styles from "../../styles/Server.module.css";
 import Navbar from "../../components/navbar";
 import Button from "../../components/button";
-import { useUser } from "../../components/user";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
-import Timestamp from "react-timestamp";
-import api from "../../api";
-import Link from "next/link";
-import { MdAddComment } from "react-icons/md";
-import { AiFillLike, AiFillDislike } from "react-icons/ai";
-import { CircularProgress } from "@mui/material";
 import CommentBox from "../../components/commentBox";
 import Comment from "../../components/comment";
-import { InnerLoading } from "../../components/loading";
-import { GoVerified } from "react-icons/go";
-import ReCAPTCHA from "react-google-recaptcha";
+import api from "../../api";
+import Link from "next/link";
+import Reaptcha from "reaptcha";
 
 export default function ServerInfo() {
     const [serverInfo, setServerInfo] = useState(null);
@@ -29,6 +28,7 @@ export default function ServerInfo() {
     const { id } = router.query;
 
     const postComment = async () => {
+        setCaptcha(null);
         window.grecaptcha.reset();
         setPostingComment(true);
         try {
@@ -40,10 +40,7 @@ export default function ServerInfo() {
             if (data.success) {
                 setServerInfo({
                     ...serverInfo,
-                    comments: [
-                        ...serverInfo.comments,
-                        data.data,
-                    ],
+                    comments: [...serverInfo.comments, data.data],
                 });
             }
         } catch (err) {
@@ -54,6 +51,7 @@ export default function ServerInfo() {
     };
 
     const handleVote = (value) => {
+        setCaptcha(null);
         window.grecaptcha.reset();
         setVoting(true);
         setTimeout(() => setVoting(false), 1000);
@@ -79,6 +77,7 @@ export default function ServerInfo() {
             })
             .catch(() => setLoading(false));
     }, [user]);
+
     return (
         <>
             <Head>
@@ -143,8 +142,7 @@ export default function ServerInfo() {
                                             {serverInfo.user.username}
                                         </Link>
                                     </div>
-                                    <br />
-                                    <p>IP: {serverInfo.address}</p>
+                                    <h2>IP: {serverInfo.address}</h2>
                                     <p>{serverInfo.description}</p>
                                 </div>
                                 <div className={styles.comments}>
@@ -155,7 +153,7 @@ export default function ServerInfo() {
                                                 flexDirection: "column",
                                                 alignItems: "center",
                                                 justifyContent: "center",
-                                                margin: "0 0 10px 0",
+                                                margin: "10px 0",
                                             }}
                                         >
                                             <div
@@ -226,15 +224,16 @@ export default function ServerInfo() {
                                                     Post
                                                 </Button>
                                             )}
-                                            <div style={{ margin: "5px 0" }} />
-                                            <ReCAPTCHA
-                                                sitekey={
-                                                    process.env
-                                                        .NEXT_PUBLIC_RECAPTCHA_SITE_KEY
-                                                }
-                                                onChange={setCaptcha}
-                                                theme="dark"
-                                            />
+                                            <div className={styles.recaptcha}>
+                                                <Reaptcha
+                                                    sitekey={
+                                                        process.env
+                                                            .NEXT_PUBLIC_RECAPTCHA_SITE_KEY
+                                                    }
+                                                    onVerify={setCaptcha}
+                                                    theme="dark"
+                                                />
+                                            </div>
                                         </div>
                                     ) : (
                                         <div>

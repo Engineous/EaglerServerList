@@ -20,7 +20,7 @@
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    transition: 0.2s all ease-in-out;
+    /* transition: 0.2s all ease-in-out; */
 }
 
 .button:hover {
@@ -44,7 +44,7 @@
     align-items: center;
     justify-content: center;
     gap: 5px;
-    transition: 0.2s all ease-in-out;
+    /* transition: 0.2s all ease-in-out; */
 }
 
 .disabledButton svg {
