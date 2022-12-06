@@ -14,6 +14,12 @@ app.use(
             "http://localhost:3000", // development
             process.env.FRONTEND_URI,
         ],
+        exposedHeaders: [
+            "Retry-After",
+            "RateLimit-Reset",
+            "RateLimit-Limit",
+            "RateLimit-Remaining",
+        ],
     })
 );
 app.use((_err: Error, _req: Request, res: Response, _next: NextFunction) =>

@@ -139,8 +139,8 @@ router.get("/full", User, async (req: Request, res: Response) => {
 router.post(
     "/",
     rateLimit({
-        windowMs: 5 * 60 * 1000,
-        max: 10,
+        windowMs: 30 * 1000, // 30 seconds per comment
+        max: 1,
         standardHeaders: true,
         legacyHeaders: false,
     }),
