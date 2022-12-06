@@ -50,12 +50,18 @@ export default function ServerInfo() {
                 });
             }
         } catch (err) {
-            if (err.response && err.response.status == 429)
+            if (err.response && err.response.status == 429) {
+                console.log(err.response.headers);
+                const retryAfter = err.response.headers["retry-after"];
                 notify({
                     type: "error",
-                    content: "You are being rate limited.",
+                    content: `You are being rate limited.${
+                        retryAfter
+                            ? ` Please retry after ${retryAfter} seconds.`
+                            : ""
+                    }`,
                 });
-            else if (
+            } else if (
                 !err.repsonse ||
                 !err.response.data ||
                 !err.response.data.message
