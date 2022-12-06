@@ -50,7 +50,12 @@ export default function ServerInfo() {
                 });
             }
         } catch (err) {
-            if (
+            if (err.response && err.response.status == 429)
+                notify({
+                    type: "error",
+                    content: "You are being rate limited.",
+                });
+            else if (
                 !err.repsonse ||
                 !err.response.data ||
                 !err.response.data.message
