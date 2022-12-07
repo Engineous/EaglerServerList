@@ -1,8 +1,7 @@
 import { useUser } from "../../components/user";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { MdAddComment } from "react-icons/md";
-import { AiFillLike, AiFillDislike } from "react-icons/ai";
+import { IoMdThumbsUp, IoMdThumbsDown } from "react-icons/io";
 import { CircularProgress } from "@mui/material";
 import { InnerLoading } from "../../components/loading";
 import { GoVerified } from "react-icons/go";
@@ -194,7 +193,7 @@ export default function ServerInfo() {
                                                             color="#0e0e0e"
                                                             iconColor="#fb8464"
                                                             icon={
-                                                                <AiFillLike />
+                                                                <IoMdThumbsUp />
                                                             }
                                                             onClick={() =>
                                                                 handleVote(true)
@@ -207,7 +206,7 @@ export default function ServerInfo() {
                                                             color="#0e0e0e"
                                                             iconColor="#fb8464"
                                                             icon={
-                                                                <AiFillDislike />
+                                                                <IoMdThumbsDown />
                                                             }
                                                             onClick={() =>
                                                                 handleVote(
