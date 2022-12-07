@@ -16,19 +16,29 @@ export default function Profile() {
         if (!user) {
             router.push("/");
         }
-    }), [user];
+    }),
+        [user];
     return (
         <>
             <Navbar />
             {user ? (
                 <>
-                    <Userbox username={user.username} createdAt={user.createdAt} avatar={user.avatar} admin={user.admin} servers={user.servers} profile={true} />
+                    <Userbox
+                        username={user.username}
+                        createdAt={user.createdAt}
+                        avatar={user.avatar}
+                        admin={user.admin}
+                        servers={user.servers}
+                        profile={true}
+                    />
                 </>
-            ):(
+            ) : (
                 <>
-                  <p className={styles.center}>Sorry, you are not logged in!</p> 
+                    <p className={styles.center}>
+                        Sorry, you are not logged in!
+                    </p>
                 </>
-            )} 
+            )}
         </>
     );
 }

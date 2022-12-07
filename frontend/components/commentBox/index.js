@@ -1,4 +1,6 @@
 import styles from "./Input.module.css";
+import { MdSend } from "react-icons/md";
+import { CircularProgress } from "@mui/material";
 
 const Input = ({ value, startIcon, placeholder, onChange, type }) => (
     <div className={styles.inputContainer}>
@@ -14,20 +16,44 @@ const Input = ({ value, startIcon, placeholder, onChange, type }) => (
     </div>
 );
 
-const CommentBox = ({ avatar, value, onChange }) => (
+const CommentBox = ({
+    avatar,
+    value,
+    onChange,
+    onClick,
+    disabled,
+    loading,
+}) => (
     <div
         style={{
             margin: "10px 0",
-            width: "50vw",
         }}
     >
-        <Input
-            value={value}
-            type="text"
-            startIcon={<img src={avatar} />}
-            onChange={onChange}
-            placeholder="Type a comment..."
-        />
+        <div className={styles.inputContainer}>
+            <div className={styles.inputStartIcon}>
+                <img src={avatar} />
+            </div>
+            <div className={styles.commentInput}>
+                <input
+                    value={value}
+                    type="text"
+                    placeholder="Type a comment..."
+                    onChange={(event) => onChange(event.target.value)}
+                />
+                <button
+                    className={
+                        disabled ? styles.disabledButton : styles.button
+                    }
+                    onClick={disabled ? () => {} : loading ? () => {} : onClick}
+                >
+                    {loading ? (
+                        <CircularProgress size={20} />
+                    ) : (
+                        <MdSend color={disabled ? "#fff" : "#fb8464"} />
+                    )}
+                </button>
+            </div>
+        </div>
     </div>
 );
 

@@ -1,6 +1,3 @@
-import { ThemeProvider } from "@emotion/react";
-import { CircularProgress } from "@mui/material";
-import { createTheme } from "@mui/system";
 import styles from "./Button.module.css";
 
 const Button = ({
@@ -12,15 +9,6 @@ const Button = ({
     disabled,
     style,
 }) => {
-    const theme = createTheme({
-        palette: {
-            type: "dark",
-            primary: {
-                main: "#FB8464",
-                contrastText: "#fff",
-            },
-        },
-    });
     return disabled ? (
         <button
             style={{

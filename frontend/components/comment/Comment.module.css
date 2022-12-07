@@ -10,6 +10,10 @@
     width: 97vw;
     padding: 15px;
 }
+.box p {
+    max-width: 95%;
+    word-wrap: break-word;
+}
 .avatar {
     margin: 0 10px;
     display: flex;

@@ -51,7 +51,6 @@ export default function ServerInfo() {
             }
         } catch (err) {
             if (err.response && err.response.status == 429) {
-                console.log(err.response.headers);
                 const retryAfter = err.response.headers["retry-after"];
                 notify({
                     type: "error",
@@ -62,7 +61,7 @@ export default function ServerInfo() {
                     }`,
                 });
             } else if (
-                !err.repsonse ||
+                !err.response ||
                 !err.response.data ||
                 !err.response.data.message
             )
@@ -161,7 +160,7 @@ export default function ServerInfo() {
                                             {serverInfo.user.username}
                                         </Link>
                                     </div>
-                                    <h2>IP: {serverInfo.address}</h2>
+                                    <h2>IP: <span>{serverInfo.address}</span></h2>
                                     <p>{serverInfo.description}</p>
                                 </div>
                                 <div className={styles.comments}>
@@ -202,7 +201,7 @@ export default function ServerInfo() {
                                                             }
                                                             disabled={!captcha}
                                                         >
-                                                            Upvote
+                                                            Nice!
                                                         </Button>
                                                         <Button
                                                             color="#0e0e0e"
@@ -217,7 +216,7 @@ export default function ServerInfo() {
                                                             }
                                                             disabled={!captcha}
                                                         >
-                                                            Downvote
+                                                            Sh*t!
                                                         </Button>
                                                     </>
                                                 )}
@@ -226,8 +225,14 @@ export default function ServerInfo() {
                                                 avatar={user.avatar}
                                                 onChange={setCommentContent}
                                                 value={commentContent}
+                                                onClick={postComment}
+                                                disabled={
+                                                    commentContent == "" ||
+                                                    !captcha
+                                                }
+                                                loading={postingComment}
                                             />
-                                            {postingComment ? (
+                                            {/* {postingComment ? (
                                                 <CircularProgress size={39} />
                                             ) : (
                                                 <Button
@@ -242,7 +247,7 @@ export default function ServerInfo() {
                                                 >
                                                     Post
                                                 </Button>
-                                            )}
+                                            )} */}
                                             <div className={styles.recaptcha}>
                                                 <Reaptcha
                                                     sitekey={

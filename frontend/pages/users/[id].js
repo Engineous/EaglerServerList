@@ -16,57 +16,68 @@ export default function Profile() {
     const [loading, setLoading] = useState(true);
     const [requestedUser, setRequestedUser] = useState(null);
     const { user } = useUser();
-    
+
     useEffect(() => {
         api.getSpecificUser(id)
             .then((data) => {
                 setRequestedUser(data.data);
                 setLoading(false);
-            }).catch((err) => {setLoading(false);})
+            })
+            .catch((err) => {
+                setLoading(false);
+            });
     }, [user, requestedUser]);
     return (
         <>
             <Navbar />
             {loading ? (
-                <>
-
-                </>
-            ):(
+                <></>
+            ) : (
                 <>
                     {user ? (
                         <>
                             {requestedUser ? (
                                 <>
-                                    <Userbox avatar={requestedUser.avatar} username={requestedUser.username} admin={requestedUser.admin} createdAt={requestedUser.admin} servers={requestedUser.servers} profile={false} />
+                                    <Userbox
+                                        avatar={requestedUser.avatar}
+                                        username={requestedUser.username}
+                                        admin={requestedUser.admin}
+                                        createdAt={requestedUser.admin}
+                                        servers={requestedUser.servers}
+                                        profile={false}
+                                    />
                                 </>
-                            ):(
+                            ) : (
                                 <>
                                     <div
-                                    style={{
-                                        display: "flex",
-                                        flexDirection: "column",
-                                        alignItems: "center",
-                                        justifyContent: "center",
-                                        width: "100vw",
-                                        height: "calc(100vh - 60px)",
-                                    }}
-                                >
-                                    <h1>Oops!</h1>
-                                    <p>
-                                        Looks like this user doesnt exist... yet{" "}
-                                        <Link href="/">
-                                            <span>Go home?</span>
-                                        </Link>
-                                    </p>
-                                </div>
+                                        style={{
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            width: "100vw",
+                                            height: "calc(100vh - 60px)",
+                                        }}
+                                    >
+                                        <h1>Oops!</h1>
+                                        <p>
+                                            Looks like this user doesnt exist...
+                                            yet{" "}
+                                            <Link href="/">
+                                                <span>Go home?</span>
+                                            </Link>
+                                        </p>
+                                    </div>
                                 </>
                             )}
                         </>
-                    ):(
+                    ) : (
                         <>
-                            <p className={styles.center}>Sorry, you are not logged in!</p> 
+                            <p className={styles.center}>
+                                Sorry, you are not logged in!
+                            </p>
                         </>
-                    )} 
+                    )}
                 </>
             )}
         </>

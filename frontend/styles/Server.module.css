@@ -19,11 +19,12 @@
     gap: 8px;
 }
 .ownerAvatar img {
-    max-width: 24px;
+    max-width: 36px;
     height: auto;
     border-radius: 24px;
 }
 .ownerAvatar a {
+    font-size: 18px;
     font-weight: 500;
     color: #fb8464;
 }
