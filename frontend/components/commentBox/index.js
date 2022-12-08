@@ -41,9 +41,7 @@ const CommentBox = ({
                     onChange={(event) => onChange(event.target.value)}
                 />
                 <button
-                    className={
-                        disabled ? styles.disabledButton : styles.button
-                    }
+                    className={disabled ? styles.disabledButton : styles.button}
                     onClick={disabled ? () => {} : loading ? () => {} : onClick}
                 >
                     {loading ? (

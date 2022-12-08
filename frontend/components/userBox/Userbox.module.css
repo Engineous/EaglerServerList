@@ -39,3 +39,9 @@
     justify-content: space-between;
     width: 100%;
 }
+.flexAlign {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
+}

@@ -1,85 +1,149 @@
+import { useEffect, useState } from "react";
+import { useUser } from "../../components/user";
 import Head from "next/head";
 import styles from "/styles/Profile.module.css";
 import Navbar from "../../components/navbar";
-import { InnerLoading } from "../../components/loading";
-import { useEffect, useState } from "react";
-import { useUser } from "../../components/user";
 import api from "../../api";
-import Server from "../../components/server";
 import Userbox from "../../components/userBox";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import { FaDiscord } from "react-icons/fa";
+import Button from "../../components/button";
+import { InnerLoading } from "../../components/loading";
 
 export default function Profile() {
     const router = useRouter();
     const { id } = router.query;
     const [loading, setLoading] = useState(true);
-    const [requestedUser, setRequestedUser] = useState(null);
+    const [userData, setUserData] = useState(null);
     const { user } = useUser();
 
     useEffect(() => {
         api.getSpecificUser(id)
             .then((data) => {
-                setRequestedUser(data.data);
+                setUserData(data.data);
                 setLoading(false);
             })
-            .catch((err) => {
-                setLoading(false);
-            });
-    }, [user, requestedUser]);
+            .catch(() => setLoading(false));
+    }, []);
     return (
         <>
-            <Navbar />
-            {loading ? (
-                <></>
-            ) : (
-                <>
-                    {user ? (
-                        <>
-                            {requestedUser ? (
-                                <>
-                                    <Userbox
-                                        avatar={requestedUser.avatar}
-                                        username={requestedUser.username}
-                                        admin={requestedUser.admin}
-                                        createdAt={requestedUser.admin}
-                                        servers={requestedUser.servers}
-                                        profile={false}
-                                    />
-                                </>
-                            ) : (
-                                <>
-                                    <div
-                                        style={{
-                                            display: "flex",
-                                            flexDirection: "column",
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                            width: "100vw",
-                                            height: "calc(100vh - 60px)",
-                                        }}
-                                    >
-                                        <h1>Oops!</h1>
-                                        <p>
-                                            Looks like this user doesnt exist...
-                                            yet{" "}
-                                            <Link href="/">
-                                                <span>Go home?</span>
-                                            </Link>
-                                        </p>
-                                    </div>
-                                </>
-                            )}
-                        </>
-                    ) : (
-                        <>
-                            <p className={styles.center}>
-                                Sorry, you are not logged in!
-                            </p>
-                        </>
-                    )}
-                </>
-            )}
+            <Head>
+                {user ? (
+                    <title>
+                        Eagler Server List |{" "}
+                        {userData ? userData.username : "Unknown User"}
+                    </title>
+                ) : (
+                    <title>Eagler Server List | Not Authorized</title>
+                )}
+                <meta
+                    name="viewport"
+                    content="width=device-width, initial-scale=1, shrink-to-fit=no"
+                />
+                <meta httpEquiv="x-ua-compatible" content="ie=edge" />
+                <meta
+                    property="og:description"
+                    content={
+                        userData
+                            ? `View ${userData.username}'s profile.`
+                            : "Unknown User"
+                    }
+                />
+                <meta
+                    property="twitter:description"
+                    content={
+                        userData
+                            ? `View ${userData.username}'s profile.`
+                            : "Unknown User"
+                    }
+                />
+                <meta property="theme-color" content="#FB8464" />
+                <meta
+                    property="og:title"
+                    content={`Eagler Server List - ${
+                        userData ? userData.username : "Unknown User"
+                    }`}
+                />
+                <meta property="og:type" content="website" />
+                <link rel="icon" href="/favicon.ico" />
+            </Head>
+            <div className={styles.root}>
+                <Navbar />
+                {loading ? (
+                    <InnerLoading />
+                ) : (
+                    <>
+                        {user ? (
+                            <>
+                                {userData ? (
+                                    <>
+                                        <Userbox
+                                            avatar={userData.avatar}
+                                            username={userData.username}
+                                            admin={userData.admin}
+                                            createdAt={userData.createdAt}
+                                            servers={userData.servers}
+                                            profile={false}
+                                        />
+                                    </>
+                                ) : (
+                                    <>
+                                        <div
+                                            className={styles.center}
+                                            style={{
+                                                width: "100vw",
+                                                height: "calc(100vh - 60px)",
+                                            }}
+                                        >
+                                            <h1>Oops!</h1>
+                                            <p>
+                                                Looks like this user doesn't
+                                                exist.{" "}
+                                                <Link href="/">
+                                                    <span>Go home?</span>
+                                                </Link>
+                                            </p>
+                                        </div>
+                                    </>
+                                )}
+                            </>
+                        ) : (
+                            <div
+                                className={styles.center}
+                                style={{
+                                    width: "100vw",
+                                    height: "calc(100vh - 60px)",
+                                }}
+                            >
+                                <h1>Oops!</h1>
+                                <p>
+                                    You must be logged in to perform this
+                                    action.
+                                </p>
+                                <div style={{ margin: "5px 0" }} />
+                                <Button
+                                    icon={<FaDiscord size={24} />}
+                                    color="#5865F2"
+                                    onClick={() =>
+                                        router.push(
+                                            `https://discord.com/oauth2/authorize?client_id=${
+                                                process.env
+                                                    .NEXT_PUBLIC_CLIENT_ID
+                                            }&redirect_uri=${encodeURIComponent(
+                                                process.env
+                                                    .NEXT_PUBLIC_REDIRECT_URI
+                                            )}&response_type=code&scope=identify`
+                                        )
+                                    }
+                                >
+                                    Login with Discord
+                                </Button>
+                            </div>
+                        )}
+                    </>
+                )}
+            </div>
         </>
     );
 }

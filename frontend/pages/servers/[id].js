@@ -159,28 +159,25 @@ export default function ServerInfo() {
                                             {serverInfo.user.username}
                                         </Link>
                                     </div>
-                                    <h2>IP: <span>{serverInfo.address}</span></h2>
+                                    <h2>
+                                        IP: <span>{serverInfo.address}</span>
+                                    </h2>
                                     <p>{serverInfo.description}</p>
                                 </div>
                                 <div className={styles.comments}>
                                     {user ? (
                                         <div
+                                            className={styles.flexCenter}
                                             style={{
-                                                display: "flex",
-                                                flexDirection: "column",
-                                                alignItems: "center",
-                                                justifyContent: "center",
                                                 margin: "10px 0",
                                             }}
                                         >
                                             <div
+                                                className={styles.flexCenter}
                                                 style={{
-                                                    display: "flex",
-                                                    flexDirection: "row",
-                                                    alignItems: "center",
-                                                    justifyContent: "center",
                                                     margin: "0 0 10px 0",
                                                     gap: "10px",
+                                                    flexDirection: "row",
                                                 }}
                                             >
                                                 {voting ? (
@@ -231,22 +228,6 @@ export default function ServerInfo() {
                                                 }
                                                 loading={postingComment}
                                             />
-                                            {/* {postingComment ? (
-                                                <CircularProgress size={39} />
-                                            ) : (
-                                                <Button
-                                                    icon={<MdAddComment />}
-                                                    iconColor="#fb8464"
-                                                    color="#0e0e0e"
-                                                    onClick={postComment}
-                                                    disabled={
-                                                        commentContent == "" ||
-                                                        !captcha
-                                                    }
-                                                >
-                                                    Post
-                                                </Button>
-                                            )} */}
                                             <div className={styles.recaptcha}>
                                                 <Reaptcha
                                                     sitekey={
@@ -260,7 +241,7 @@ export default function ServerInfo() {
                                         </div>
                                     ) : (
                                         <div>
-                                            <p>
+                                            <p style={{ color: "#ff6565" }}>
                                                 You must login to be able to
                                                 post comments.
                                             </p>

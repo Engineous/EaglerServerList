@@ -1,5 +1,6 @@
 import Timestamp from "react-timestamp";
 import styles from "./Userbox.module.css";
+import { MdShield } from "react-icons/md";
 
 const ServersBox = ({ servers, profile }) => {
     return (
@@ -60,8 +61,9 @@ const InfoBox = ({ username, createdAt, avatar, admin }) => {
                     <img src={avatar} />
                 </div>
                 <div>
-                    <h2>
-                        {username} {admin && <span>[Admin]</span>}
+                    <h2 className={styles.flexAlign}>
+                        {username}{" "}
+                        {admin && <MdShield color="#fb8464" title="Admin" />}
                     </h2>
                     <p className={styles.joinedAt}>
                         Joined: <Timestamp date={createdAt} />

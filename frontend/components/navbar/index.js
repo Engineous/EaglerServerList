@@ -29,11 +29,13 @@ const Avatar = () => {
                 <h2>{user.username}</h2>
             </div>
             <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+                <MenuItem onClick={() => router.push(`/users/${user.uuid}`)}>
+                    Your Profile
+                </MenuItem>
                 <MenuItem
-                    onClick={async () => {
+                    onClick={() => {
                         handleClose();
-                        await api.logout().catch(() => router.reload());
-                        router.reload();
+                        api.logout().then(router.reload).catch(router.reload);
                     }}
                 >
                     Logout

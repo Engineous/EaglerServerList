@@ -30,16 +30,18 @@ const App = ({ Component, pageProps }) => {
         setTimeout(() => setLoading(false), 500);
     }, []);
 
-    return loading ? (
-        <Loading />
-    ) : (
-        <UserProvider value={{ user, setUser }}>
-            <ThemeProvider theme={theme}>
-                <NotificationProvider>
-                    <Component {...pageProps} />
-                </NotificationProvider>
-            </ThemeProvider>
-        </UserProvider>
+    return (
+        <ThemeProvider theme={theme}>
+            {loading ? (
+                <Loading />
+            ) : (
+                <UserProvider value={{ user, setUser }}>
+                    <NotificationProvider>
+                        <Component {...pageProps} />
+                    </NotificationProvider>
+                </UserProvider>
+            )}
+        </ThemeProvider>
     );
 };
 
