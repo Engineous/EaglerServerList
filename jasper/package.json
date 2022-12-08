@@ -13,11 +13,14 @@
   "dependencies": {
     "@prisma/client": "^4.7.1",
     "axios": "^1.2.1",
+    "cron": "^2.1.0",
     "dotenv": "^16.0.3",
+    "logging": "^3.3.0",
     "prisma": "^4.7.1",
     "ws": "^8.11.0"
   },
   "devDependencies": {
+    "@types/cron": "^2.0.0",
     "@types/node": "^18.11.11",
     "@types/ws": "^8.5.3",
     "typescript": "^4.9.3"

@@ -86,6 +86,7 @@ model Analytic {
   server    Server       @relation(fields: [serverId], references: [uuid])
   serverId  String
   data      String
+  history   String[]     @default([])
   createdAt DateTime     @default(now())
 
   @@map("analytics")
@@ -93,4 +94,5 @@ model Analytic {
 
 enum AnalyticType {
   PLAYER_COUNT
+  @@map("analytictypes")
 }

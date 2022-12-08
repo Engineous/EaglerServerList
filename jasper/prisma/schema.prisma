@@ -83,9 +83,10 @@ model VoteCooldown {
 model Analytic {
   id        Int          @id @default(autoincrement())
   type      AnalyticType
-  server    Server       @relation(fields: [serverId], references: [uuid])
   serverId  String
+  server    Server       @relation(fields: [serverId], references: [uuid])
   data      String
+  history   String[]     @default([])
   createdAt DateTime     @default(now())
 
   @@map("analytics")
@@ -93,4 +94,5 @@ model Analytic {
 
 enum AnalyticType {
   PLAYER_COUNT
+  @@map("analytictypes")
 }
