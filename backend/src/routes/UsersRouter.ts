@@ -27,6 +27,22 @@ router.get("/:uuid", async (req: Request, res: Response) => {
                     verified: true,
                 },
             },
+            comments: {
+                select: {
+                    content: true,
+                    postedAt: true,
+                    server: {
+                        select: {
+                            uuid: true,
+                            name: true,
+                        },
+                    },
+                },
+                orderBy: {
+                    postedAt: "desc",
+                },
+                take: 10,
+            },
         },
     });
 
