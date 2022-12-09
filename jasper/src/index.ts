@@ -6,11 +6,6 @@ import { CronJob } from "cron";
 
 const logger = createLogger("Jasper");
 
-// not sure why this is needed, uncomment if this is required
-// enum types {
-//     PLAYER_COUNT,
-// }
-
 type ServerResponse = {
     data: {
         motd: string[];
@@ -64,8 +59,7 @@ const runAnalyticPlayerCount = () => {
             ws.on("message", async (msg) => {
                 ws.close();
                 logger.info(`Connected to ${serverInfo.address}`);
-                const data = (safelyParseJSON(msg.toString()) as ServerResponse)
-                    .data;
+                const data = (safelyParseJSON(msg.toString()) as ServerResponse).data;
                 if (!data)
                     return logger.warn(
                         `Server ${serverInfo.address} returned invalid JSON data, skipping collection.`
@@ -77,8 +71,15 @@ const runAnalyticPlayerCount = () => {
                         data: data.online.toString(),
                     },
                 });
+                await prisma.analytic.create({
+                    data: {
+                        serverId: serverInfo.uuid,
+                        type: AnalyticType.UPTIME,
+                        data: "true",
+                    },
+                });
                 logger.info(
-                    `Successfully collected player count analytics for ${serverInfo.address}`
+                    `Successfully collected player count and uptime analytics for ${serverInfo.address}`
                 );
             });
             ws.onerror = () => {
@@ -87,9 +88,8 @@ const runAnalyticPlayerCount = () => {
             };
         });
     });
+    logger.info(`Last Run: ${Date.now()}`)
 };
 
-runAnalyticPlayerCount();
-
-// const job = new CronJob("59 * * * * *", runAnalyticPlayerCount);
-// job.start();
+const job = new CronJob("* 59 * * * *", runAnalyticPlayerCount);
+job.start();

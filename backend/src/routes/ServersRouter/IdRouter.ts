@@ -81,7 +81,23 @@ router.get("/", async (req: Request, res: Response) => {
         data: server,
     });
 });
-
+router.get("/analytics", User, async(req: Request, res: Response) => {
+    const serverAnalytics = await prisma.analytic.findMany({
+        where:{
+            serverId: req.params.uuid,
+        },
+    });
+    if (!serverAnalytics)
+        return res.status(400).json({
+            success: false,
+            message: "Sorry, this server has no analytics/does not exist. If you just recently created your server, it will show up here in a bit",
+        });
+    return res.json({
+        success: true,
+        message: "Successfully retrived analytics",
+        data: serverAnalytics,
+    });
+});
 router.get("/full", User, async (req: Request, res: Response) => {
     const server = await prisma.server.findUnique({
         where: {
