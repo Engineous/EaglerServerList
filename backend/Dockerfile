@@ -1,4 +1,4 @@
-FROM node:alpine AS deps
+FROM node:16-bullseye-slim AS deps
 WORKDIR /app
 
 COPY package*.json ./
@@ -10,7 +10,7 @@ COPY . .
 RUN npx prisma generate
 RUN npm run build
 
-FROM node:alpine AS app
+FROM node:16-bullseye-slim AS app
 WORKDIR /app
 
 COPY --from=deps /app/dist ./dist

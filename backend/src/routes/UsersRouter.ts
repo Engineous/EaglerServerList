@@ -25,12 +25,20 @@ router.get("/:uuid", async (req: Request, res: Response) => {
                     votes: true,
                     disabled: true,
                     verified: true,
+                    createdAt: true,
                 },
             },
             comments: {
                 select: {
                     content: true,
                     postedAt: true,
+                    poster: {
+                        select: {
+                            uuid: true,
+                            username: true,
+                            avatar: true,
+                        },
+                    },
                     server: {
                         select: {
                             uuid: true,
