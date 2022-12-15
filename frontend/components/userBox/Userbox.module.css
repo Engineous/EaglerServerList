@@ -32,16 +32,42 @@
     margin: 0;
     padding: 0;
 }
+
 .toprow {
+    margin: 30px 30px;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
     justify-content: space-between;
-    width: 100%;
+    gap: 15px;
 }
+
 .flexAlign {
     display: flex;
     flex-direction: row;
     align-items: center;
     gap: 5px;
+}
+
+.profile {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
+
+.profile img {
+    width: 64px;
+    height: auto;
+    border-radius: 64px;
+}
+
+.details p {
+    color: #656565;
+}
+
+.details h2 {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
 }

@@ -20,6 +20,7 @@ class API {
             endpoint: "/users/@me",
         });
     }
+
     async getSpecificUser(uuid) {
         return await this.request({
             endpoint: `/users/${uuid}`,

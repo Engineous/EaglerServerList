@@ -6,42 +6,29 @@ import StorageIcon from "@mui/icons-material/Storage";
 import Link from "next/link";
 import Button from "../button";
 import { FaDiscord } from "react-icons/fa";
-import { useState } from "react";
-import { Menu, MenuItem } from "@mui/material";
+import { MdArrowForward } from "react-icons/md";
 import api from "../../api";
 
 const Avatar = () => {
-    const [anchorEl, setAnchorEl] = useState(null);
-    const { user, setUser } = useUser();
+    const { user } = useUser();
     const router = useRouter();
-    const open = Boolean(anchorEl);
-    const handleClick = (event) => {
-        setAnchorEl(event.currentTarget);
-    };
-    const handleClose = () => {
-        setAnchorEl(null);
-    };
+
+    const handleLogout = () =>
+        api.logout().then(router.reload).catch(router.reload);
 
     return (
-        <>
-            <div className={styles.avatar} onClick={handleClick}>
+        <div className={styles.avatarContainer}>
+            <div
+                className={styles.avatar}
+                onClick={() => router.push(`/users/${user.uuid}`)}
+            >
                 <img src={user.avatar} />
-                <h2>{user.username}</h2>
+                <p>{user.username}</p>
             </div>
-            <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
-                <MenuItem onClick={() => router.push(`/users/${user.uuid}`)}>
-                    Your Profile
-                </MenuItem>
-                <MenuItem
-                    onClick={() => {
-                        handleClose();
-                        api.logout().then(router.reload).catch(router.reload);
-                    }}
-                >
-                    Logout
-                </MenuItem>
-            </Menu>
-        </>
+            <button className={styles.button} onClick={handleLogout}>
+                <MdArrowForward color="#ff6565" />
+            </button>
+        </div>
     );
 };
 

@@ -1,11 +1,7 @@
-import Head from "next/head";
 import styles from "/styles/Profile.module.css";
 import Navbar from "../components/navbar";
-import { InnerLoading } from "../components/loading";
 import { useEffect, useState } from "react";
 import { useUser } from "../components/user";
-import api from "../api";
-import Server from "../components/server";
 import Userbox from "../components/userBox";
 import { useRouter } from "next/router";
 

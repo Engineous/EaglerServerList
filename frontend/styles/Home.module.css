@@ -1,12 +1,12 @@
-.root {
+.homeRoot {
     margin: 0;
     padding: 0;
 }
 
-.root h1 {
+.homeRoot h1 {
     margin: 10px 20px;
 }
 
-.root p {
+.homeRoot p {
     margin: 10px 20px;
 }

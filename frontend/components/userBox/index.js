@@ -1,88 +1,61 @@
 import Timestamp from "react-timestamp";
 import styles from "./Userbox.module.css";
+import { FaCode } from "react-icons/fa";
+import Badge from "../badge";
+import { FaUserCircle, FaServer, FaCommentAlt } from "react-icons/fa";
+import Card from "../card";
 import { MdShield } from "react-icons/md";
+import Server from "../server";
+import Comment from "../comment";
 
-const ServersBox = ({ servers, profile }) => {
-    return (
-        <div
-            className={styles.ownedServersBox}
-            style={{ padding: "20px", margin: "20px", borderRadius: "20px" }}
-        >
-            <h2>Owned Servers</h2>
-            <br />
-            {profile ? (
-                <>
-                    {servers ? (
-                        <div className={styles.servers}>
-                            {servers.map((server, index) => (
-                                <div key={index}>
-                                    <h3>
-                                        {server.name} - {server.address}
-                                    </h3>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <p>You have no servers...yet</p>
-                    )}
-                </>
-            ) : (
-                <>
-                    {servers ? (
-                        <div className={styles.servers}>
-                            {servers.map((server, index) => (
-                                <div key={index}>
-                                    <h3>
-                                        {server.name} - {server.address}
-                                    </h3>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <p>This user has no servers...yet</p>
-                    )}
-                </>
-            )}
-        </div>
-    );
-};
-const InfoBox = ({ username, createdAt, avatar, admin }) => {
-    return (
-        <div className={styles.row}>
-            <div
-                className={styles.box}
-                style={{
-                    padding: "20px",
-                    margin: "20px",
-                    borderRadius: "20px",
-                }}
-            >
-                <div className={styles.avatar}>
-                    <img src={avatar} />
-                </div>
-                <div>
-                    <h2 className={styles.flexAlign}>
-                        {username}{" "}
-                        {admin && <MdShield color="#fb8464" title="Admin" />}
-                    </h2>
-                    <p className={styles.joinedAt}>
-                        Joined: <Timestamp date={createdAt} />
-                    </p>
-                </div>
-            </div>
-        </div>
-    );
-};
-const Userbox = ({ avatar, username, admin, createdAt, servers, profile }) => {
+const Userbox = ({ user }) => {
+    const { servers, comments } = user;
     return (
         <div className={styles.toprow}>
-            <InfoBox
-                username={username}
-                createdAt={createdAt}
-                avatar={avatar}
-                admin={admin}
-            />
-            <ServersBox servers={servers} profile={profile} />
+            <Card icon={<FaUserCircle />} text="Profile">
+                <div className={styles.profile}>
+                    <img src={user.avatar} />
+                    <div className={styles.details}>
+                        <h2>
+                            {user.username}{" "}
+                            {user.admin && (
+                                <Badge icon={<MdShield />} color="#fb8464">
+                                    Admin
+                                </Badge>
+                            )}
+                        </h2>
+                        <p>
+                            Joined: <Timestamp date={user.createdAt} />
+                        </p>
+                    </div>
+                </div>
+            </Card>
+            <Card icon={<FaServer />} text="Owned Servers">
+                {servers ? (
+                    servers.map((server, index) => (
+                        <Server server={server} key={index} inline />
+                    ))
+                ) : (
+                    <p>This user does not have any servers.</p>
+                )}
+            </Card>
+            <Card icon={<FaCommentAlt />} text="Recent Comments">
+                {comments ? (
+                    <div
+                        style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "10px",
+                        }}
+                    >
+                        {comments.map((comment, index) => (
+                            <Comment comment={comment} key={index} inline />
+                        ))}
+                    </div>
+                ) : (
+                    <p>This user does not have any recent comments.</p>
+                )}
+            </Card>
         </div>
     );
 };

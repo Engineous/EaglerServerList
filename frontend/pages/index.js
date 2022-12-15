@@ -40,23 +40,25 @@ export default function Home() {
                 <meta property="og:type" content="website" />
                 <link rel="icon" href="/favicon.ico" />
             </Head>
-            <div className={styles.root}>
+            <div>
                 <Navbar />
-                <h1>Servers</h1>
-                <p>View a list of available servers.</p>
-                {loading ? (
-                    <InnerLoading />
-                ) : (
-                    <>
-                        {serversInfo ? (
-                            serversInfo.map((server, index) => (
-                                <Server server={server} key={index} />
-                            ))
-                        ) : (
-                            <p>Failed to load servers</p>
-                        )}
-                    </>
-                )}
+                <div className={styles.homeRoot}>
+                    <h1>Servers</h1>
+                    <p>View a list of available servers.</p>
+                    {loading ? (
+                        <InnerLoading />
+                    ) : (
+                        <>
+                            {serversInfo ? (
+                                serversInfo.map((server, index) => (
+                                    <Server server={server} key={index} />
+                                ))
+                            ) : (
+                                <p>Failed to load servers</p>
+                            )}
+                        </>
+                    )}
+                </div>
             </div>
         </>
     );

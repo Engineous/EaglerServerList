@@ -78,14 +78,7 @@ export default function Profile() {
                             <>
                                 {userData ? (
                                     <>
-                                        <Userbox
-                                            avatar={userData.avatar}
-                                            username={userData.username}
-                                            admin={userData.admin}
-                                            createdAt={userData.createdAt}
-                                            servers={userData.servers}
-                                            profile={false}
-                                        />
+                                        <Userbox user={userData} />
                                     </>
                                 ) : (
                                     <>
