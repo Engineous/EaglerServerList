@@ -67,6 +67,7 @@ router.get("/@me", User, async (req: Request, res: Response) => {
     const servers = await prisma.server.findMany({
         where: {
             owner: req.user.uuid,
+            disabled: false,
         },
     });
 
