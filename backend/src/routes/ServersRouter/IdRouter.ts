@@ -81,16 +81,17 @@ router.get("/", async (req: Request, res: Response) => {
         data: server,
     });
 });
-router.get("/analytics", User, async(req: Request, res: Response) => {
+router.get("/analytics", User, async (req: Request, res: Response) => {
     const serverAnalytics = await prisma.analytic.findMany({
-        where:{
+        where: {
             serverId: req.params.uuid,
         },
     });
     if (!serverAnalytics)
         return res.status(400).json({
             success: false,
-            message: "Sorry, this server has no analytics/does not exist. If you just recently created your server, it will show up here in a bit",
+            message:
+                "Sorry, this server has no analytics/does not exist. If you just recently created your server, it will show up here in a bit",
         });
     return res.json({
         success: true,
@@ -327,12 +328,13 @@ router.post("/vote", User, async (req: Request, res: Response) => {
             message: "Request did not specify a body.",
         });
 
-    const { captcha } = req.body;
+    const { captcha, value } = req.body;
 
     if (!captcha)
         return res.status(400).json({
             success: false,
-            message: "Nice try. (missing captcha in request body)",
+            message:
+                "One or more required fields in the request body were missing.",
         });
 
     try {
@@ -381,14 +383,21 @@ router.post("/vote", User, async (req: Request, res: Response) => {
             message: "You are currently on a vote cooldown.",
         });
 
-    await prisma.server.update({
+    const updatedServer = await prisma.server.update({
         where: {
             uuid: server.uuid,
         },
         data: {
-            votes: {
-                increment: 1,
-            },
+            votes: Boolean(value)
+                ? {
+                      increment: 1,
+                  }
+                : {
+                      decrement: 1,
+                  },
+        },
+        select: {
+            votes: true,
         },
     });
 
@@ -404,6 +413,7 @@ router.post("/vote", User, async (req: Request, res: Response) => {
         success: true,
         message:
             "Successfully voted for this server. You can vote again in 24 hours.",
+        data: updatedServer,
     });
 });
 
