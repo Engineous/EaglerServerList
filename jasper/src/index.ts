@@ -3,7 +3,7 @@ import { WebSocket } from "ws";
 import createLogger from "logging";
 const prisma = new PrismaClient();
 import { CronJob } from "cron";
-const version = "v1.0.1"
+const version = "v1.0.2"
 const logger = createLogger("Jasper");
 logger.info(`Started JASPER ${version}`)
 type ServerResponse = {
@@ -56,32 +56,36 @@ const runAnalyticPlayerCount = () => {
             const ws = new WebSocket(`${serverInfo.address}`);
             logger.info(`Connecting to ${serverInfo.address}...`);
             ws.onopen = () => ws.send("Accept: MOTD.cache");
-            ws.on("message", async (msg) => {
-                ws.close();
-                logger.info(`Connected to ${serverInfo.address}`);
-                const data = (safelyParseJSON(msg.toString()) as ServerResponse).data;
-                if (!data)
-                    return logger.warn(
-                        `Server ${serverInfo.address} returned invalid JSON data, skipping collection.`
-                    );
-                await prisma.analytic.create({
-                    data: {
-                        serverId: serverInfo.uuid,
-                        type: AnalyticType.PLAYER_COUNT,
-                        data: data.online.toString(),
-                    },
+            try{
+                ws.on("message", async (msg) => {
+                    ws.close();
+                    logger.info(`Connected to ${serverInfo.address}`);
+                    const data = (safelyParseJSON(msg.toString()) as ServerResponse) ? (safelyParseJSON(msg.toString()) as ServerResponse).data : null; // very cancer code, but there is a reason for this
+                    if (!data)
+                        return logger.warn(
+                            `Server ${serverInfo.address} returned invalid JSON data, skipping collection.`
+                        );
+                    await prisma.analytic.create({
+                        data: {
+                            serverId: serverInfo.uuid,
+                            type: AnalyticType.PLAYER_COUNT,
+                            data: data.online.toString(),
+                        },
+                    });
+                    await prisma.analytic.create({
+                        data: {
+                            serverId: serverInfo.uuid,
+                            type: AnalyticType.UPTIME,
+                            data: "true",
+                        },
+                    });
+                    logger.info(
+                        `Successfully collected player count and uptime analytics for ${serverInfo.address}`
+                        );
                 });
-                await prisma.analytic.create({
-                    data: {
-                        serverId: serverInfo.uuid,
-                        type: AnalyticType.UPTIME,
-                        data: "true",
-                    },
-                });
-                logger.info(
-                    `Successfully collected player count and uptime analytics for ${serverInfo.address}`
-                );
-            });
+            } catch (_) {
+                logger.error(`Unable to process data from ${serverInfo.address}`)
+            }
             ws.onerror = async () => {
                 logger.warn(`Unable to connect to ${serverInfo.address}`);
                 await prisma.analytic.create({
@@ -105,5 +109,5 @@ const runAnalyticPlayerCount = () => {
     logger.info(`Last Run: ${Date.now()}`)
 };
 
-const job = new CronJob("* 59 * * * *", runAnalyticPlayerCount);
+const job = new CronJob("30 * * * *", runAnalyticPlayerCount);
 job.start();
