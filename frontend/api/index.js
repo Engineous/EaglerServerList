@@ -55,6 +55,17 @@ class API {
             },
         });
     }
+
+    async vote({ id, captcha, value }) {
+        return await this.request({
+            endpoint: `/servers/${id}/vote`,
+            method: "POST",
+            body: {
+                captcha,
+                value,
+            },
+        });
+    }
 }
 
 export default new API();

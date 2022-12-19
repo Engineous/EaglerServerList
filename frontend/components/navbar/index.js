@@ -86,7 +86,7 @@ const Navbar = () => {
             {user ? (
                 <Avatar />
             ) : (
-                <div style={{ margin: "0 10px 0 0" }}>
+                <div style={{ margin: "0 30px 0 0" }}>
                     <Button
                         icon={<FaDiscord size={24} />}
                         color="#5865F2"

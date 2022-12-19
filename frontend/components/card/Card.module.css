@@ -5,13 +5,14 @@
     background-color: #272727;
     border-radius: 10px;
     width: 100%;
-    min-height: 100px;
+    height: auto;
+    flex-grow: 1;
     box-shadow: 0 0.5em 1em -0.125em rgb(10 10 10 / 10%),
         0 0 0 1px rgb(10 10 10 / 2%);
+    gap: 10px;
 }
 
 .header {
-    margin: 0 0 10px 0;
     padding: 0 5px;
     display: flex;
     flex-direction: row;
@@ -24,4 +25,7 @@
 
 .content {
     margin: 0 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }

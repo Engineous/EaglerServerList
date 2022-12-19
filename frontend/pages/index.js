@@ -1,21 +1,30 @@
 import Head from "next/head";
+import Script from "next/script";
 import styles from "../styles/Home.module.css";
 import Navbar from "../components/navbar";
 import { InnerLoading } from "../components/loading";
 import { useEffect, useState } from "react";
 import api from "../api";
 import Server from "../components/server";
+import { useNotification } from "../components/notification";
 
 export default function Home() {
     const [loading, setLoading] = useState(true);
     const [serversInfo, setServersInfo] = useState(null);
+    const notify = useNotification();
     useEffect(() => {
         api.getServers(0) // TODO: Get ?page param and pass it to api.getServers()
             .then((data) => {
                 setServersInfo(data.data);
                 setLoading(false);
             })
-            .catch(() => setLoading(false));
+            .catch(() => {
+                setLoading(false);
+                notify({
+                    type: "error",
+                    content: "Failed to load servers.",
+                });
+            });
     }, []);
 
     return (
@@ -49,12 +58,15 @@ export default function Home() {
                         <InnerLoading />
                     ) : (
                         <>
-                            {serversInfo ? (
+                            {serversInfo && serversInfo.length > 0 ? (
                                 serversInfo.map((server, index) => (
                                     <Server server={server} key={index} />
                                 ))
                             ) : (
-                                <p>Failed to load servers</p>
+                                <div className={styles.center}>
+                                    <h1>Oops!</h1>
+                                    <p>No servers found.</p>
+                                </div>
                             )}
                         </>
                     )}

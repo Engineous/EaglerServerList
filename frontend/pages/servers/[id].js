@@ -15,12 +15,18 @@ import Comment from "../../components/comment";
 import api from "../../api";
 import Link from "next/link";
 import Reaptcha from "reaptcha";
+import Card from "../../components/card";
+import { FaCommentAlt, FaServer } from "react-icons/fa";
+import { MdDescription, MdInsertChart } from "react-icons/md";
+import Timestamp from "react-timestamp";
 
 export default function ServerInfo() {
     const [serverInfo, setServerInfo] = useState(null);
     const [commentContent, setCommentContent] = useState("");
     const [postingComment, setPostingComment] = useState(false);
-    const [captcha, setCaptcha] = useState(null);
+    const [voteCaptcha, setVoteCaptcha] = useState(null);
+    const [commentCaptcha, setCommentCaptcha] = useState(null);
+    const [voteValue, setVoteValue] = useState(null);
     const [voting, setVoting] = useState(false);
     const [loading, setLoading] = useState(true);
     const { user } = useUser();
@@ -28,10 +34,10 @@ export default function ServerInfo() {
     const notify = useNotification();
     const { id } = router.query;
 
-    const postComment = async () => {
-        setCaptcha(null);
-        window.grecaptcha.reset();
+    const postComment = async (captcha) => {
+        commentCaptcha.reset();
         setPostingComment(true);
+
         try {
             const data = await api.postComment({
                 uuid: serverInfo.uuid,
@@ -78,12 +84,53 @@ export default function ServerInfo() {
         setCommentContent("");
     };
 
-    const handleVote = (value) => {
-        // TODO: implement voting
-        setCaptcha(null);
-        window.grecaptcha.reset();
+    const handleVote = async (captcha) => {
+        setVoteValue(null);
+        voteCaptcha.reset();
         setVoting(true);
-        setTimeout(() => setVoting(false), 1000);
+        try {
+            const data = await api.vote({
+                id: serverInfo.uuid,
+                value: voteValue,
+                captcha,
+            });
+            if (data.success) {
+                setServerInfo({
+                    ...serverInfo,
+                    votes: data.data.votes,
+                });
+                notify({
+                    type: "success",
+                    content: "Successfully voted for this server.",
+                });
+            }
+        } catch (err) {
+            if (err.response && err.response.status == 429) {
+                const retryAfter = err.response.headers["retry-after"];
+                notify({
+                    type: "error",
+                    content: `You are being rate limited.${
+                        retryAfter
+                            ? ` Please retry after ${retryAfter} seconds.`
+                            : ""
+                    }`,
+                });
+            } else if (
+                !err.response ||
+                !err.response.data ||
+                !err.response.data.message
+            )
+                notify({
+                    type: "error",
+                    content: "An unknown error occurred.",
+                });
+            else
+                notify({
+                    type: "error",
+                    content: err.response.data.message,
+                });
+        }
+        setVoting(false);
     };
 
     useEffect(() => {
@@ -141,7 +188,7 @@ export default function ServerInfo() {
                     <>
                         {serverInfo ? (
                             <>
-                                <div className={styles.center}>
+                                {/* <div className={styles.center}>
                                     <h1 className={styles.title}>
                                         {serverInfo.name}{" "}
                                         {serverInfo.approved && (
@@ -159,95 +206,185 @@ export default function ServerInfo() {
                                             {serverInfo.user.username}
                                         </Link>
                                     </div>
-                                    <h2>
-                                        IP: <span>{serverInfo.address}</span>
-                                    </h2>
-                                    <p>{serverInfo.description}</p>
-                                </div>
-                                <div className={styles.comments}>
-                                    {user ? (
-                                        <div
-                                            className={styles.flexCenter}
-                                            style={{
-                                                margin: "10px 0",
-                                            }}
+                                </div> */}
+                                <div className={styles.flexCenter}>
+                                    <h1>
+                                        {serverInfo.name}{" "}
+                                        {serverInfo.approved && (
+                                            <GoVerified
+                                                color="#fb8464"
+                                                size={28}
+                                            />
+                                        )}
+                                    </h1>
+                                    <div className={styles.ownerAvatar}>
+                                        <img src={serverInfo.user.avatar} />
+                                        <Link
+                                            href={`/users/${serverInfo.user.uuid}`}
                                         >
-                                            <div
-                                                className={styles.flexCenter}
+                                            {serverInfo.user.username}
+                                        </Link>
+                                    </div>
+                                </div>
+                                <div className={styles.cardsRow}>
+                                    <Card
+                                        icon={<FaServer />}
+                                        text="Server Info"
+                                    >
+                                        <div className={styles.flexRow}>
+                                            <div className={styles.flexColumn}>
+                                                <h3>Address</h3>
+                                                <p>
+                                                    <span
+                                                        style={{
+                                                            fontWeight: "600",
+                                                        }}
+                                                    >
+                                                        {serverInfo.address}
+                                                    </span>
+                                                </p>
+                                            </div>
+                                            <div className={styles.flexColumn}>
+                                                <h3>Created</h3>
+                                                <p style={{ color: "#888" }}>
+                                                    <Timestamp
+                                                        date={
+                                                            serverInfo.createdAt
+                                                        }
+                                                    />
+                                                </p>
+                                            </div>
+                                            <div className={styles.flexColumn}>
+                                                <h3>Updated</h3>
+                                                <p style={{ color: "#888" }}>
+                                                    <Timestamp
+                                                        date={
+                                                            serverInfo.updatedAt
+                                                        }
+                                                    />
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </Card>
+                                    <Card icon={<MdInsertChart />} text="Votes">
+                                        <p>
+                                            This server has{" "}
+                                            <span
                                                 style={{
-                                                    margin: "0 0 10px 0",
-                                                    gap: "10px",
-                                                    flexDirection: "row",
+                                                    color: `${
+                                                        serverInfo.votes > 0
+                                                            ? "#46e393"
+                                                            : "#ff6565"
+                                                    }`,
                                                 }}
                                             >
-                                                {voting ? (
-                                                    <CircularProgress
-                                                        size={39}
+                                                {serverInfo.votes}
+                                            </span>{" "}
+                                            votes.
+                                        </p>
+                                        <div className={styles.flexRow}>
+                                            {voting ? (
+                                                <CircularProgress size={36} />
+                                            ) : (
+                                                <>
+                                                    <Button
+                                                        color="#0e0e0e"
+                                                        iconColor="#fb8464"
+                                                        icon={<IoMdThumbsUp />}
+                                                        onClick={() => {
+                                                            setVoteValue(true);
+                                                            voteCaptcha.execute();
+                                                        }}
+                                                    >
+                                                        Nice!
+                                                    </Button>
+                                                    <Button
+                                                        color="#0e0e0e"
+                                                        iconColor="#fb8464"
+                                                        icon={
+                                                            <IoMdThumbsDown />
+                                                        }
+                                                        onClick={() => {
+                                                            setVoteValue(false);
+                                                            voteCaptcha.execute();
+                                                        }}
+                                                    >
+                                                        Sh*t!
+                                                    </Button>
+                                                    <Reaptcha
+                                                        ref={(e) => {
+                                                            setVoteCaptcha(e);
+                                                        }}
+                                                        sitekey={
+                                                            process.env
+                                                                .NEXT_PUBLIC_RECAPTCHA_SITE_KEY
+                                                        }
+                                                        onVerify={(res) =>
+                                                            handleVote(res)
+                                                        }
+                                                        theme="dark"
+                                                        size="invisible"
                                                     />
-                                                ) : (
-                                                    <>
-                                                        <Button
-                                                            color="#0e0e0e"
-                                                            iconColor="#fb8464"
-                                                            icon={
-                                                                <IoMdThumbsUp />
-                                                            }
-                                                            onClick={() =>
-                                                                handleVote(true)
-                                                            }
-                                                            disabled={!captcha}
-                                                        >
-                                                            Nice!
-                                                        </Button>
-                                                        <Button
-                                                            color="#0e0e0e"
-                                                            iconColor="#fb8464"
-                                                            icon={
-                                                                <IoMdThumbsDown />
-                                                            }
-                                                            onClick={() =>
-                                                                handleVote(
-                                                                    false
-                                                                )
-                                                            }
-                                                            disabled={!captcha}
-                                                        >
-                                                            Sh*t!
-                                                        </Button>
-                                                    </>
-                                                )}
-                                            </div>
-                                            <CommentBox
-                                                avatar={user.avatar}
-                                                onChange={setCommentContent}
-                                                value={commentContent}
-                                                onClick={postComment}
-                                                disabled={
-                                                    commentContent == "" ||
-                                                    !captcha
-                                                }
-                                                loading={postingComment}
-                                            />
-                                            <div className={styles.recaptcha}>
+                                                </>
+                                            )}
+                                        </div>
+                                    </Card>
+                                </div>
+                                <div className={styles.cardsRow}>
+                                    <Card
+                                        icon={<FaCommentAlt />}
+                                        text="Comments"
+                                    >
+                                        {user ? (
+                                            <>
+                                                <CommentBox
+                                                    avatar={user.avatar}
+                                                    onChange={setCommentContent}
+                                                    value={commentContent}
+                                                    onClick={() => {
+                                                        commentCaptcha.execute();
+                                                    }}
+                                                    disabled={
+                                                        commentContent == ""
+                                                    }
+                                                    loading={postingComment}
+                                                />
                                                 <Reaptcha
+                                                    ref={(e) => {
+                                                        setCommentCaptcha(e);
+                                                    }}
                                                     sitekey={
                                                         process.env
                                                             .NEXT_PUBLIC_RECAPTCHA_SITE_KEY
                                                     }
-                                                    onVerify={setCaptcha}
+                                                    onVerify={(res) =>
+                                                        postComment(res)
+                                                    }
                                                     theme="dark"
+                                                    size="invisible"
                                                 />
-                                            </div>
-                                        </div>
-                                    ) : (
-                                        <div>
+                                            </>
+                                        ) : (
                                             <p style={{ color: "#ff6565" }}>
                                                 You must login to be able to
                                                 post comments.
                                             </p>
-                                            <br />
-                                        </div>
-                                    )}
+                                        )}
+                                        {[]
+                                            .concat(serverInfo.comments)
+                                            .sort((a, b) =>
+                                                a.postedAt < b.postedAt ? 1 : -1
+                                            )
+                                            .map((comment, index) => (
+                                                <Comment
+                                                    comment={comment}
+                                                    key={index}
+                                                    inline
+                                                />
+                                            ))}
+                                    </Card>
+                                </div>
+                                {/* <div className={styles.comments}>
                                     {[]
                                         .concat(serverInfo.comments)
                                         .sort((a, b) =>
@@ -264,7 +401,7 @@ export default function ServerInfo() {
                                             No comments
                                         </p>
                                     )}
-                                </div>
+                                </div> */}
                             </>
                         ) : (
                             <div

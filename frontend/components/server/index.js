@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 import styles from "./Server.module.css";
 import Timestamp from "react-timestamp";
 
-const Server = ({ server, inline }) => {
+const Server = ({ server, motd, inline }) => {
     const router = useRouter();
 
     return inline ? (
@@ -31,8 +31,22 @@ const Server = ({ server, inline }) => {
                 {server.name}{" "}
                 {server.approved && <GoVerified color="#fb8464" />}
             </h2>
+            <h3
+                style={{
+                    color: "#aaa",
+                }}
+            >
+                Votes:{" "}
+                <span
+                    style={{
+                        color: `${server.votes > 0 ? "#46e393" : "#ff6565"}`,
+                    }}
+                >
+                    {server.votes}
+                </span>
+            </h3>
             <h3>IP: {server.address}</h3>
-            <p>(PLACEHOLDER MOTD)</p>
+            {motd}
             <div className={styles.buttonContainer}>
                 <Button
                     color="#202020"
