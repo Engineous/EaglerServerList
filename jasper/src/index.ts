@@ -3,9 +3,9 @@ import { WebSocket } from "ws";
 import createLogger from "logging";
 const prisma = new PrismaClient();
 import { CronJob } from "cron";
-
+const version = "v1.0.1"
 const logger = createLogger("Jasper");
-
+logger.info(`Started JASPER ${version}`)
 type ServerResponse = {
     data: {
         motd: string[];
@@ -55,7 +55,7 @@ const runAnalyticPlayerCount = () => {
         servers.forEach(async (serverInfo: Server) => {
             const ws = new WebSocket(`${serverInfo.address}`);
             logger.info(`Connecting to ${serverInfo.address}...`);
-            ws.onopen = () => ws.send("Accept: MOTD");
+            ws.onopen = () => ws.send("Accept: MOTD.cache");
             ws.on("message", async (msg) => {
                 ws.close();
                 logger.info(`Connected to ${serverInfo.address}`);
@@ -82,8 +82,22 @@ const runAnalyticPlayerCount = () => {
                     `Successfully collected player count and uptime analytics for ${serverInfo.address}`
                 );
             });
-            ws.onerror = () => {
+            ws.onerror = async () => {
                 logger.warn(`Unable to connect to ${serverInfo.address}`);
+                await prisma.analytic.create({
+                    data: {
+                        serverId: serverInfo.uuid,
+                        type: AnalyticType.UPTIME,
+                        data: "false",
+                    },
+                });
+                await prisma.analytic.create({
+                    data: {
+                        serverId: serverInfo.uuid,
+                        type: AnalyticType.PLAYER_COUNT,
+                        data: "0",
+                    },
+                });
                 ws.terminate();
             };
         });

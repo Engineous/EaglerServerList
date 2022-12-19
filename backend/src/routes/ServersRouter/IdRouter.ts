@@ -4,7 +4,9 @@ import { ExplicitTypesOnFields, StringsOnly, User } from "../../middleware";
 import { daysFromNow, validateCaptcha } from "../../utils";
 import { WebSocket } from "ws";
 import { createHash } from "crypto";
+import {AnalyticType } from "@prisma/client";
 import rateLimit from "express-rate-limit";
+import { transformDocument } from "@prisma/client/runtime";
 
 const validTags = [
     "PVP",
@@ -82,21 +84,56 @@ router.get("/", async (req: Request, res: Response) => {
     });
 });
 router.get("/analytics", User, async (req: Request, res: Response) => {
-    const serverAnalytics = await prisma.analytic.findMany({
+    var yesterday = new Date(new Date().getTime() - (24 * 60 * 60 * 1000));
+    const serverAnalyticsPlayerC = await prisma.analytic.findMany({
         where: {
             serverId: req.params.uuid,
+            type: AnalyticType.PLAYER_COUNT,
+            AND: {
+                createdAt:{
+                    gte: yesterday,
+                }
+            }
         },
+        select:{
+            data:true,
+        }
     });
-    if (!serverAnalytics)
+    const serverAnalyticsUptimeC = await prisma.analytic.findMany({
+        where: {
+            serverId: req.params.uuid,
+            type: AnalyticType.UPTIME,
+            AND: {
+                createdAt:{
+                    gte: yesterday,
+                }
+            }
+        },
+        select:{
+            data:true,
+        }
+    });
+    if (!serverAnalyticsPlayerC && !serverAnalyticsUptimeC || serverAnalyticsPlayerC.length == 0 && serverAnalyticsUptimeC.length == 0)
         return res.status(400).json({
             success: false,
             message:
                 "Sorry, this server has no analytics/does not exist. If you just recently created your server, it will show up here in a bit",
         });
+    const playerCounts: string[] = [];
+    var uptimeInPercent = 0;
+    serverAnalyticsPlayerC.forEach((plc) => {
+        playerCounts.push(plc.data);
+    });
+    serverAnalyticsUptimeC.forEach((upc) => {
+        if (upc.data == "true") {
+            uptimeInPercent++;
+        }
+    });
+    uptimeInPercent = (uptimeInPercent / serverAnalyticsUptimeC.length) * 100;
     return res.json({
         success: true,
-        message: "Successfully retrived analytics",
-        data: serverAnalytics,
+        message: "Successfully retrived analytics for the last 24 hours",
+        data: {"PlayerCount":playerCounts, "UptimeInPercent":uptimeInPercent ? uptimeInPercent : 0},
     });
 });
 router.get("/full", User, async (req: Request, res: Response) => {
