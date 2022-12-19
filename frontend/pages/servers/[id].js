@@ -16,9 +16,71 @@ import api from "../../api";
 import Link from "next/link";
 import Reaptcha from "reaptcha";
 import Card from "../../components/card";
-import { FaCommentAlt, FaServer } from "react-icons/fa";
-import { MdDescription, MdInsertChart } from "react-icons/md";
+import {
+    FaCommentAlt,
+    FaCommentSlash,
+    FaGamepad,
+    FaQuestion,
+    FaServer,
+    FaSkull,
+    FaTools,
+    FaUserCog,
+} from "react-icons/fa";
+import {
+    MdGames,
+    MdFastfood,
+    MdInsertChart,
+    MdLocalPolice,
+    MdShield,
+    MdVisibilityOff,
+} from "react-icons/md";
+import { GiStoneBlock, GiSwordsEmblem } from "react-icons/gi";
+import { RiTeamFill } from "react-icons/ri";
 import Timestamp from "react-timestamp";
+import Badge from "../../components/badge";
+
+const badges = {
+    PVP: {
+        color: "#ff6565",
+        icon: <GiSwordsEmblem />,
+    },
+    PVE: {
+        color: "#ff6565",
+        icon: <FaSkull />,
+    },
+    FACTIONS: {
+        color: "#ff6565",
+        icon: <RiTeamFill />,
+    },
+    MINIGAMES: {
+        color: "#f7ff65",
+        icon: <MdGames />,
+    },
+    SURVIVAL: {
+        color: "#46e393",
+        icon: <MdFastfood />,
+    },
+    CREATIVE: {
+        color: "#46e393",
+        icon: <FaTools />,
+    },
+    SKYBLOCK: {
+        color: "#46e393",
+        icon: <GiStoneBlock />,
+    },
+    PRISON: {
+        color: "#ff6565",
+        icon: <MdLocalPolice />,
+    },
+    RPG: {
+        color: "#ff6565",
+        icon: <FaGamepad />,
+    },
+    MISCELLANEOUS: {
+        color: "#46e393",
+        icon: <FaQuestion />,
+    },
+};
 
 export default function ServerInfo() {
     const [serverInfo, setServerInfo] = useState(null);
@@ -225,6 +287,16 @@ export default function ServerInfo() {
                                             {serverInfo.user.username}
                                         </Link>
                                     </div>
+
+                                    {serverInfo.tags.map((tag, index) => (
+                                        <Badge
+                                            icon={badges[tag].icon}
+                                            color={badges[tag].color}
+                                            key={index}
+                                        >
+                                            {tag}
+                                        </Badge>
+                                    ))}
                                 </div>
                                 <div className={styles.cardsRow}>
                                     <Card
@@ -329,6 +401,43 @@ export default function ServerInfo() {
                                             )}
                                         </div>
                                     </Card>
+                                    {user.admin && (
+                                        <Card
+                                            icon={<MdShield />}
+                                            text="Admin Actions"
+                                        >
+                                            <div className={styles.flexRow}>
+                                                <Button
+                                                    icon={<MdInsertChart />}
+                                                    iconColor="#ff6565"
+                                                    color="#0e0e0e"
+                                                >
+                                                    Set Votes
+                                                </Button>
+                                                <Button
+                                                    icon={<MdVisibilityOff />}
+                                                    iconColor="#ff6565"
+                                                    color="#0e0e0e"
+                                                >
+                                                    Disable Server
+                                                </Button>
+                                                <Button
+                                                    icon={<FaCommentSlash />}
+                                                    iconColor="#ff6565"
+                                                    color="#0e0e0e"
+                                                >
+                                                    Clear Comments
+                                                </Button>
+                                                <Button
+                                                    icon={<FaUserCog />}
+                                                    iconColor="#ff6565"
+                                                    color="#0e0e0e"
+                                                >
+                                                    Owner Override
+                                                </Button>
+                                            </div>
+                                        </Card>
+                                    )}
                                 </div>
                                 <div className={styles.cardsRow}>
                                     <Card
