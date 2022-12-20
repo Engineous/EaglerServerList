@@ -1,8 +1,12 @@
 import Link from "next/link";
+import { FaTrash } from "react-icons/fa";
 import Timestamp from "react-timestamp";
+import Button from "../button";
+import { useUser } from "../user";
 import styles from "./Comment.module.css";
 
 const Comment = ({ comment, inline }) => {
+    const { user } = useUser();
     return inline ? (
         <>
             <div className={styles.inlineBox}>

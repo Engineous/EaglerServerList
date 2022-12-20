@@ -7,6 +7,7 @@ import { InnerLoading } from "../../components/loading";
 import { GoVerified } from "react-icons/go";
 import { useNotification } from "../../components/notification";
 import Head from "next/head";
+import dynamic from "next/dynamic";
 import styles from "../../styles/Server.module.css";
 import Navbar from "../../components/navbar";
 import Button from "../../components/button";
@@ -16,6 +17,10 @@ import api from "../../api";
 import Link from "next/link";
 import Reaptcha from "reaptcha";
 import Card from "../../components/card";
+import { GiStoneBlock, GiSwordsEmblem } from "react-icons/gi";
+import { RiTeamFill } from "react-icons/ri";
+import Timestamp from "react-timestamp";
+import Badge from "../../components/badge";
 import {
     FaCommentAlt,
     FaCommentSlash,
@@ -33,11 +38,9 @@ import {
     MdLocalPolice,
     MdShield,
     MdVisibilityOff,
+    MdDescription,
 } from "react-icons/md";
-import { GiStoneBlock, GiSwordsEmblem } from "react-icons/gi";
-import { RiTeamFill } from "react-icons/ri";
-import Timestamp from "react-timestamp";
-import Badge from "../../components/badge";
+const ReactMarkdown = dynamic(() => import("react-markdown"));
 
 const badges = {
     PVP: {
@@ -287,16 +290,18 @@ export default function ServerInfo() {
                                             {serverInfo.user.username}
                                         </Link>
                                     </div>
-
-                                    {serverInfo.tags.map((tag, index) => (
-                                        <Badge
-                                            icon={badges[tag].icon}
-                                            color={badges[tag].color}
-                                            key={index}
-                                        >
-                                            {tag}
-                                        </Badge>
-                                    ))}
+                                    <div className={styles.badgeContainer}>
+                                        {serverInfo.tags.map((tag, index) => (
+                                            <Badge
+                                                icon={badges[tag].icon}
+                                                color={badges[tag].color}
+                                                key={index}
+                                                inline
+                                            >
+                                                {tag}
+                                            </Badge>
+                                        ))}
+                                    </div>
                                 </div>
                                 <div className={styles.cardsRow}>
                                     <Card
@@ -355,53 +360,70 @@ export default function ServerInfo() {
                                             votes.
                                         </p>
                                         <div className={styles.flexRow}>
-                                            {voting ? (
-                                                <CircularProgress size={36} />
-                                            ) : (
-                                                <>
-                                                    <Button
-                                                        color="#0e0e0e"
-                                                        iconColor="#fb8464"
-                                                        icon={<IoMdThumbsUp />}
-                                                        onClick={() => {
-                                                            setVoteValue(true);
-                                                            voteCaptcha.execute();
-                                                        }}
-                                                    >
-                                                        Nice!
-                                                    </Button>
-                                                    <Button
-                                                        color="#0e0e0e"
-                                                        iconColor="#fb8464"
-                                                        icon={
-                                                            <IoMdThumbsDown />
-                                                        }
-                                                        onClick={() => {
-                                                            setVoteValue(false);
-                                                            voteCaptcha.execute();
-                                                        }}
-                                                    >
-                                                        Sh*t!
-                                                    </Button>
-                                                    <Reaptcha
-                                                        ref={(e) => {
-                                                            setVoteCaptcha(e);
-                                                        }}
-                                                        sitekey={
-                                                            process.env
-                                                                .NEXT_PUBLIC_RECAPTCHA_SITE_KEY
-                                                        }
-                                                        onVerify={(res) =>
-                                                            handleVote(res)
-                                                        }
-                                                        theme="dark"
-                                                        size="invisible"
+                                            {user ? (
+                                                voting ? (
+                                                    <CircularProgress
+                                                        size={36}
                                                     />
-                                                </>
+                                                ) : (
+                                                    <>
+                                                        <Button
+                                                            color="#0e0e0e"
+                                                            iconColor="#fb8464"
+                                                            icon={
+                                                                <IoMdThumbsUp />
+                                                            }
+                                                            onClick={() => {
+                                                                setVoteValue(
+                                                                    true
+                                                                );
+                                                                voteCaptcha.execute();
+                                                            }}
+                                                        >
+                                                            Nice!
+                                                        </Button>
+                                                        <Button
+                                                            color="#0e0e0e"
+                                                            iconColor="#fb8464"
+                                                            icon={
+                                                                <IoMdThumbsDown />
+                                                            }
+                                                            onClick={() => {
+                                                                setVoteValue(
+                                                                    false
+                                                                );
+                                                                voteCaptcha.execute();
+                                                            }}
+                                                        >
+                                                            Sh*t!
+                                                        </Button>
+                                                        <Reaptcha
+                                                            ref={(e) => {
+                                                                setVoteCaptcha(
+                                                                    e
+                                                                );
+                                                            }}
+                                                            sitekey={
+                                                                process.env
+                                                                    .NEXT_PUBLIC_RECAPTCHA_SITE_KEY
+                                                            }
+                                                            onVerify={(res) =>
+                                                                handleVote(res)
+                                                            }
+                                                            theme="dark"
+                                                            size="invisible"
+                                                        />
+                                                    </>
+                                                )
+                                            ) : (
+                                                <p style={{ color: "#ff6565" }}>
+                                                    You must login to be able to
+                                                    vote.
+                                                </p>
                                             )}
                                         </div>
                                     </Card>
-                                    {user.admin && (
+                                    {user && user.admin && (
                                         <Card
                                             icon={<MdShield />}
                                             text="Admin Actions"
@@ -438,6 +460,14 @@ export default function ServerInfo() {
                                             </div>
                                         </Card>
                                     )}
+                                </div>
+                                <div className={styles.cardsRow}>
+                                    <Card
+                                        icon={<MdDescription />}
+                                        text="Description"
+                                    >
+                                        <ReactMarkdown />
+                                    </Card>
                                 </div>
                                 <div className={styles.cardsRow}>
                                     <Card
