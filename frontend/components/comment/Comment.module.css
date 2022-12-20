@@ -7,6 +7,13 @@
     justify-content: center;
     width: 100%;
     padding: 15px;
+    gap: 15px;
+}
+.inlineBox p {
+    margin: 0;
+    padding: 0;
+    max-width: 95%;
+    word-wrap: break-word;
 }
 .box {
     background-color: #272727;
