@@ -163,7 +163,18 @@ export default function ServerInfo() {
         }
       
         return null;
-      };
+    };
+    const Uptime = ({ active, payload, label, name }) => {
+    if (active && payload && payload.length) {
+        return (
+        <div className={styles.ToolTip}>
+            {payload[0].value == 1 ? (<p>{`${name} is up at this time`}</p>) : (<p>{`${name} is down at this time.`}</p>)}
+        </div>
+        );
+    }
+    
+    return null;
+    };
     const handleVote = async (captcha) => {
         setVoteValue(null);
         voteCaptcha.reset();
@@ -220,7 +231,8 @@ export default function ServerInfo() {
                 api.getAnalytics(id).then((data) => {
                     setServerAnalytics(data.data);
                     setLoading(false);
-                });
+                })
+                .catch(() => setLoading(false));
             })
             .catch(() => setLoading(false));
     }, [user]);
@@ -498,15 +510,36 @@ export default function ServerInfo() {
                                         icon={<MdAnalytics />}
                                         text="Analytics"
                                     >
-                                        <ResponsiveContainer width="100%" height={350}>
-                                            <LineChart data={serverAnalytics.PlayerCount} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
-                                                <Line type="monotone" dataKey="Player Count" stroke="#fb8464" />
-                                                <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
-                                                <XAxis dataKey="createdAt" />
-                                                <YAxis />
-                                                <Tooltip content={<PlayerTooltip />} />
-                                            </LineChart>
-                                        </ResponsiveContainer>
+                                        {serverAnalytics ? (
+                                        <div className={styles.flexRow}>
+                                            <div className={styles.flexColumn} style={{width: "100%"}}>
+                                                <h3>Player Count</h3>
+                                                <ResponsiveContainer width="100%" height={350}>
+                                                    <LineChart data={serverAnalytics.PlayerCount} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                                                        <Line type="monotone" dataKey="playercount" stroke="#fb8464" />
+                                                        <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
+                                                        <XAxis dataKey="createdAt" />
+                                                        <YAxis />
+                                                        <Tooltip content={<PlayerTooltip />} />
+                                                    </LineChart>
+                                                </ResponsiveContainer>
+                                            </div>
+                                            <div className={styles.flexColumn} style={{width: "100%"}}>
+                                                <h3>Server Uptime</h3>
+                                                <ResponsiveContainer width="100%" height={350}>
+                                                    <LineChart data={serverAnalytics.uptime} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                                                        <Line type="monotone" dataKey="up" stroke="#fb8464" />
+                                                        <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
+                                                        <XAxis dataKey="createdAt" />
+                                                        <YAxis />
+                                                        <Tooltip content={<Uptime name={serverInfo.name} />} />
+                                                    </LineChart>
+                                                </ResponsiveContainer>
+                                            </div>
+                                        </div>
+                                        ) : (
+                                            <p>No server analytics... yet.</p>
+                                        )}
                                     </Card>
                                 </div>
                                 <div className={styles.cardsRow}>

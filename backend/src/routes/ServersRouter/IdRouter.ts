@@ -113,6 +113,7 @@ router.get("/analytics", User, async (req: Request, res: Response) => {
         },
         select:{
             data:true,
+            createdAt: true,
         }
     });
     if (!serverAnalyticsPlayerC && !serverAnalyticsUptimeC || serverAnalyticsPlayerC.length == 0 && serverAnalyticsUptimeC.length == 0)
@@ -121,23 +122,22 @@ router.get("/analytics", User, async (req: Request, res: Response) => {
             message:
                 "Sorry, this server has no analytics/does not exist. If you just recently created your server, it will show up here in a bit",
         });
-    var uptimeInPercent = 0;
-    serverAnalyticsUptimeC.forEach((upc) => {
-        if (upc.data == "true") {
-            uptimeInPercent++;
-        }
-    });
-    uptimeInPercent = (uptimeInPercent / serverAnalyticsUptimeC.length) * 100;
     const playerCount = serverAnalyticsPlayerC.map((pc, index) => {
         return {
-            "Player Count": parseInt(pc.data),
+            "playercount": parseInt(pc.data),
             createdAt: moment(pc.createdAt).format("HH:mm"),
         };
     })
+    const uptimeInPercent = serverAnalyticsUptimeC.map((pc, index) => {
+        return {
+            "up": pc.data == "true" ? 1 : 0,
+            createdAt: moment(pc.createdAt).format("HH:mm"),
+        };
+    });
     return res.json({
         success: true,
         message: "Successfully retrived analytics for the last 24 hours",
-        data: {"PlayerCount":playerCount, "UptimeInPercent":uptimeInPercent ? uptimeInPercent : 0},
+        data: {"PlayerCount":playerCount, "uptime":uptimeInPercent},
     });
 });
 router.get("/full", User, async (req: Request, res: Response) => {
