@@ -103,3 +103,14 @@
     flex-wrap: wrap;
     gap: 5px;
 }
+
+.ToolTip{
+    background-color: #535353;
+}
+.ToolTip > p {
+    color: #fff;
+    font-size: 1em;
+    font-weight: 500;
+    margin: 0;
+    padding: 10px;
+}

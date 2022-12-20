@@ -19,6 +19,7 @@ import Reaptcha from "reaptcha";
 import Card from "../../components/card";
 import { GiStoneBlock, GiSwordsEmblem } from "react-icons/gi";
 import { RiTeamFill } from "react-icons/ri";
+import { LineChart, Line, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Tooltip} from 'recharts';
 import Timestamp from "react-timestamp";
 import Badge from "../../components/badge";
 import {
@@ -30,6 +31,7 @@ import {
     FaSkull,
     FaTools,
     FaUserCog,
+    FaUserFriends,
 } from "react-icons/fa";
 import {
     MdGames,
@@ -94,6 +96,7 @@ export default function ServerInfo() {
     const [voteValue, setVoteValue] = useState(null);
     const [voting, setVoting] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [serverAnalytics, setServerAnalytics] = useState(null);
     const { user } = useUser();
     const router = useRouter();
     const notify = useNotification();
@@ -148,7 +151,17 @@ export default function ServerInfo() {
         setPostingComment(false);
         setCommentContent("");
     };
-
+    const PlayerTooltip = ({ active, payload, label }) => {
+        if (active && payload && payload.length) {
+          return (
+            <div className={styles.ToolTip}>
+                <p>{`${payload[0].value} Players`}</p>
+            </div>
+          );
+        }
+      
+        return null;
+      };
     const handleVote = async (captcha) => {
         setVoteValue(null);
         voteCaptcha.reset();
@@ -202,7 +215,10 @@ export default function ServerInfo() {
         api.getServer(id)
             .then((data) => {
                 setServerInfo(data.data);
-                setLoading(false);
+                api.getAnalytics(id).then((data) => {
+                    setServerAnalytics(data.data);
+                    setLoading(false);
+                });
             })
             .catch(() => setLoading(false));
     }, [user]);
@@ -467,6 +483,22 @@ export default function ServerInfo() {
                                         text="Description"
                                     >
                                         <ReactMarkdown />
+                                    </Card>
+                                </div>
+                                <div className={styles.cardsRow}>
+                                    <Card
+                                        icon={<FaUserFriends />}
+                                        text="Player Count"
+                                    >
+                                        <ResponsiveContainer width="100%" height={350}>
+                                            <LineChart data={serverAnalytics.PlayerCount} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
+                                                <Line type="monotone" dataKey="Player Count" stroke="#fb8464" />
+                                                <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
+                                                <XAxis dataKey="createdAt" />
+                                                <YAxis />
+                                                <Tooltip content={<PlayerTooltip />} />
+                                            </LineChart>
+                                        </ResponsiveContainer>
                                     </Card>
                                 </div>
                                 <div className={styles.cardsRow}>

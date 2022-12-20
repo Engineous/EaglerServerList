@@ -66,6 +66,11 @@ class API {
             },
         });
     }
+    async getAnalytics(id) {
+        return await this.request({
+            endpoint: `/servers/${id}/analytics`,
+        });
+    }
 }
 
 export default new API();

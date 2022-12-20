@@ -3,7 +3,7 @@ import { WebSocket } from "ws";
 import createLogger from "logging";
 const prisma = new PrismaClient();
 import { CronJob } from "cron";
-const version = "v1.0.2"
+const version = "v1.0.3"
 const logger = createLogger("Jasper");
 logger.info(`Started JASPER ${version}`)
 type ServerResponse = {

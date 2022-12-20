@@ -7,6 +7,7 @@ import { createHash } from "crypto";
 import {AnalyticType } from "@prisma/client";
 import rateLimit from "express-rate-limit";
 import { transformDocument } from "@prisma/client/runtime";
+import moment from "moment";
 
 const validTags = [
     "PVP",
@@ -97,6 +98,7 @@ router.get("/analytics", User, async (req: Request, res: Response) => {
         },
         select:{
             data:true,
+            createdAt: true,
         }
     });
     const serverAnalyticsUptimeC = await prisma.analytic.findMany({
@@ -119,21 +121,23 @@ router.get("/analytics", User, async (req: Request, res: Response) => {
             message:
                 "Sorry, this server has no analytics/does not exist. If you just recently created your server, it will show up here in a bit",
         });
-    const playerCounts: string[] = [];
     var uptimeInPercent = 0;
-    serverAnalyticsPlayerC.forEach((plc) => {
-        playerCounts.push(plc.data);
-    });
     serverAnalyticsUptimeC.forEach((upc) => {
         if (upc.data == "true") {
             uptimeInPercent++;
         }
     });
     uptimeInPercent = (uptimeInPercent / serverAnalyticsUptimeC.length) * 100;
+    const playerCount = serverAnalyticsPlayerC.map((pc, index) => {
+        return {
+            "Player Count": parseInt(pc.data),
+            createdAt: moment(pc.createdAt).format("HH:mm"),
+        };
+    })
     return res.json({
         success: true,
         message: "Successfully retrived analytics for the last 24 hours",
-        data: {"PlayerCount":playerCounts, "UptimeInPercent":uptimeInPercent ? uptimeInPercent : 0},
+        data: {"PlayerCount":playerCount, "UptimeInPercent":uptimeInPercent ? uptimeInPercent : 0},
     });
 });
 router.get("/full", User, async (req: Request, res: Response) => {
