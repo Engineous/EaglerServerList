@@ -109,5 +109,5 @@ const runAnalyticPlayerCount = () => {
     logger.info(`Last Run: ${Date.now()}`)
 };
 
-const job = new CronJob("* 30 * * * *", runAnalyticPlayerCount);
+const job = new CronJob("30 * * * *", runAnalyticPlayerCount);
 job.start();
