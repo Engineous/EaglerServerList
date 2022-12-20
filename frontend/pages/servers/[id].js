@@ -531,7 +531,6 @@ export default function ServerInfo() {
                                                         <Line type="monotone" dataKey="up" stroke="#fb8464" />
                                                         <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
                                                         <XAxis dataKey="createdAt" />
-                                                        <YAxis />
                                                         <Tooltip content={<Uptime name={serverInfo.name} />} />
                                                     </LineChart>
                                                 </ResponsiveContainer>
