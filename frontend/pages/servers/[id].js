@@ -25,6 +25,7 @@ import Badge from "../../components/badge";
 import {
     FaCommentAlt,
     FaCommentSlash,
+    FaDiscord,
     FaGamepad,
     FaQuestion,
     FaServer,
@@ -41,6 +42,7 @@ import {
     MdShield,
     MdVisibilityOff,
     MdDescription,
+    MdAnalytics,
 } from "react-icons/md";
 const ReactMarkdown = dynamic(() => import("react-markdown"));
 
@@ -306,6 +308,14 @@ export default function ServerInfo() {
                                             {serverInfo.user.username}
                                         </Link>
                                     </div>
+                                    <h3>
+                                        Created at{" "}
+                                        <Timestamp
+                                            date={
+                                                serverInfo.createdAt
+                                            }
+                                        />
+                                    </h3>
                                     <div className={styles.badgeContainer}>
                                         {serverInfo.tags.map((tag, index) => (
                                             <Badge
@@ -324,7 +334,9 @@ export default function ServerInfo() {
                                         icon={<FaServer />}
                                         text="Server Info"
                                     >
-                                        <div className={styles.flexRow}>
+                                        <div className={styles.flexRow} style={{
+                                            gap: "25px",
+                                        }}>
                                             <div className={styles.flexColumn}>
                                                 <h3>Address</h3>
                                                 <p>
@@ -338,24 +350,13 @@ export default function ServerInfo() {
                                                 </p>
                                             </div>
                                             <div className={styles.flexColumn}>
-                                                <h3>Created</h3>
-                                                <p style={{ color: "#888" }}>
-                                                    <Timestamp
-                                                        date={
-                                                            serverInfo.createdAt
-                                                        }
-                                                    />
-                                                </p>
-                                            </div>
-                                            <div className={styles.flexColumn}>
-                                                <h3>Updated</h3>
-                                                <p style={{ color: "#888" }}>
-                                                    <Timestamp
-                                                        date={
-                                                            serverInfo.updatedAt
-                                                        }
-                                                    />
-                                                </p>
+                                                <h3>Discord Server</h3>
+                                                <Button
+                                                    icon={<FaDiscord />}
+                                                    color="#5865F2"
+                                                >
+                                                    Join Discord
+                                                </Button>
                                             </div>
                                         </div>
                                     </Card>
@@ -375,7 +376,9 @@ export default function ServerInfo() {
                                             </span>{" "}
                                             votes.
                                         </p>
-                                        <div className={styles.flexRow}>
+                                        <div className={styles.flexRow} style={{
+                                            gap: "10px",
+                                        }}>
                                             {user ? (
                                                 voting ? (
                                                     <CircularProgress
@@ -384,7 +387,7 @@ export default function ServerInfo() {
                                                 ) : (
                                                     <>
                                                         <Button
-                                                            color="#0e0e0e"
+                                                            color="#202020"
                                                             iconColor="#fb8464"
                                                             icon={
                                                                 <IoMdThumbsUp />
@@ -399,7 +402,7 @@ export default function ServerInfo() {
                                                             Nice!
                                                         </Button>
                                                         <Button
-                                                            color="#0e0e0e"
+                                                            color="#202020"
                                                             iconColor="#fb8464"
                                                             icon={
                                                                 <IoMdThumbsDown />
@@ -444,32 +447,35 @@ export default function ServerInfo() {
                                             icon={<MdShield />}
                                             text="Admin Actions"
                                         >
-                                            <div className={styles.flexRow}>
+                                            <div className={styles.flexRow} style={{
+                                                flexWrap: "wrap",
+                                                gap: "10px",
+                                            }}>
                                                 <Button
                                                     icon={<MdInsertChart />}
                                                     iconColor="#ff6565"
-                                                    color="#0e0e0e"
+                                                    color="#202020"
                                                 >
                                                     Set Votes
                                                 </Button>
                                                 <Button
                                                     icon={<MdVisibilityOff />}
                                                     iconColor="#ff6565"
-                                                    color="#0e0e0e"
+                                                    color="#202020"
                                                 >
                                                     Disable Server
                                                 </Button>
                                                 <Button
                                                     icon={<FaCommentSlash />}
                                                     iconColor="#ff6565"
-                                                    color="#0e0e0e"
+                                                    color="#202020"
                                                 >
                                                     Clear Comments
                                                 </Button>
                                                 <Button
                                                     icon={<FaUserCog />}
                                                     iconColor="#ff6565"
-                                                    color="#0e0e0e"
+                                                    color="#202020"
                                                 >
                                                     Owner Override
                                                 </Button>
@@ -482,7 +488,17 @@ export default function ServerInfo() {
                                         icon={<MdDescription />}
                                         text="Description"
                                     >
-                                        <ReactMarkdown />
+                                        <ReactMarkdown>
+                                            {serverInfo.description}
+                                        </ReactMarkdown>
+                                    </Card>
+                                </div>
+                                <div className={styles.cardsRow}>
+                                    <Card
+                                        icon={<MdAnalytics />}
+                                        text="Analytics"
+                                    >
+                                        <p>To be implemented</p>
                                     </Card>
                                 </div>
                                 <div className={styles.cardsRow}>
@@ -555,24 +571,6 @@ export default function ServerInfo() {
                                             ))}
                                     </Card>
                                 </div>
-                                {/* <div className={styles.comments}>
-                                    {[]
-                                        .concat(serverInfo.comments)
-                                        .sort((a, b) =>
-                                            a.postedAt < b.postedAt ? 1 : -1
-                                        )
-                                        .map((comment, index) => (
-                                            <Comment
-                                                comment={comment}
-                                                key={index}
-                                            />
-                                        ))}
-                                    {serverInfo.comments.length < 1 && (
-                                        <p className={styles.center}>
-                                            No comments
-                                        </p>
-                                    )}
-                                </div> */}
                             </>
                         ) : (
                             <div
