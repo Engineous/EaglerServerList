@@ -100,6 +100,10 @@ router.post(
             type: "string",
         },
         {
+            name: "discord",
+            type: "string",
+        },
+        {
             name: "tags",
             type: "object",
         },
@@ -112,7 +116,7 @@ router.post(
                 message: "Request did not contain a body.",
             });
 
-        const { name, description, address } = req.body;
+        const { name, description, discord, address } = req.body;
         const tags: string[] = req.body.tags;
 
         if (!name || !description || !address || !tags)
@@ -137,6 +141,12 @@ router.post(
             return res.status(400).json({
                 success: false,
                 message: "The description specified is too long!",
+            });
+
+        if (discord && discord.length > 10)
+            return res.status(400).json({
+                success: false,
+                message: "The Discord invite code specified is too long.",
             });
 
         const nameLookup = await prisma.server.findFirst({
@@ -204,6 +214,7 @@ router.post(
                 description,
                 address,
                 owner: req.user.uuid,
+                discord: discord ?? null,
                 tags,
                 code: randomString(10, "0123456789abcdef"),
             },

@@ -4,7 +4,7 @@ import { ExplicitTypesOnFields, StringsOnly, User } from "../../middleware";
 import { daysFromNow, validateCaptcha } from "../../utils";
 import { WebSocket } from "ws";
 import { createHash } from "crypto";
-import {AnalyticType } from "@prisma/client";
+import { AnalyticType } from "@prisma/client";
 import rateLimit from "express-rate-limit";
 import { transformDocument } from "@prisma/client/runtime";
 import moment from "moment";
@@ -45,14 +45,6 @@ router.get("/", async (req: Request, res: Response) => {
                     postedAt: true,
                 },
             },
-            uuid: true,
-            name: true,
-            description: true,
-            address: true,
-            createdAt: true,
-            disabled: true,
-            approved: true,
-            verified: true,
             user: {
                 select: {
                     uuid: true,
@@ -60,8 +52,17 @@ router.get("/", async (req: Request, res: Response) => {
                     avatar: true,
                 },
             },
-            tags: true,
+            uuid: true,
+            name: true,
+            description: true,
+            address: true,
+            discord: true,
+            createdAt: true,
             updatedAt: true,
+            disabled: true,
+            approved: true,
+            verified: true,
+            tags: true,
             votes: true,
         },
     });
@@ -80,64 +81,73 @@ router.get("/", async (req: Request, res: Response) => {
 
     return res.json({
         success: true,
-        message: "Successfully fetched data for server " + server.uuid,
+        message: "Successfully fetched data for this server.",
         data: server,
     });
 });
+
 router.get("/analytics", User, async (req: Request, res: Response) => {
-    var yesterday = new Date(new Date().getTime() - (24 * 60 * 60 * 1000));
-    const serverAnalyticsPlayerC = await prisma.analytic.findMany({
+    const yesterday = daysFromNow(-1);
+
+    const playerCount = await prisma.analytic.findMany({
         where: {
             serverId: req.params.uuid,
             type: AnalyticType.PLAYER_COUNT,
             AND: {
-                createdAt:{
+                createdAt: {
                     gte: yesterday,
-                }
-            }
+                },
+            },
         },
-        select:{
-            data:true,
+        select: {
+            data: true,
             createdAt: true,
-        }
+        },
     });
-    const serverAnalyticsUptimeC = await prisma.analytic.findMany({
+
+    const uptimeCount = await prisma.analytic.findMany({
         where: {
             serverId: req.params.uuid,
             type: AnalyticType.UPTIME,
             AND: {
-                createdAt:{
+                createdAt: {
                     gte: yesterday,
-                }
-            }
+                },
+            },
         },
-        select:{
-            data:true,
+        select: {
+            data: true,
             createdAt: true,
-        }
+        },
     });
-    if (!serverAnalyticsPlayerC && !serverAnalyticsUptimeC || serverAnalyticsPlayerC.length == 0 && serverAnalyticsUptimeC.length == 0)
+
+    if (
+        (!playerCount && !uptimeCount) ||
+        (playerCount.length == 0 && uptimeCount.length == 0)
+    )
         return res.status(400).json({
             success: false,
             message:
                 "Sorry, this server has no analytics/does not exist. If you just recently created your server, it will show up here in a bit",
         });
-    const playerCount = serverAnalyticsPlayerC.map((pc, index) => {
-        return {
-            "playercount": parseInt(pc.data),
-            createdAt: moment(pc.createdAt).format("HH:mm"),
-        };
-    })
-    const uptimeInPercent = serverAnalyticsUptimeC.map((pc, index) => {
-        return {
-            "up": pc.data == "true" ? 1 : 0,
-            createdAt: moment(pc.createdAt).format("HH:mm"),
-        };
-    });
+
     return res.json({
         success: true,
-        message: "Successfully retrived analytics for the last 24 hours",
-        data: {"PlayerCount":playerCount, "uptime":uptimeInPercent},
+        message: "Successfully retrieved analytics for the last 24 hours.",
+        data: {
+            playerCount: playerCount.map((pc, index) => {
+                return {
+                    playerCount: parseInt(pc.data),
+                    createdAt: pc.createdAt,
+                };
+            }),
+            uptime: uptimeCount.map((pc, index) => {
+                return {
+                    up: pc.data == "true" ? 1 : 0,
+                    createdAt: pc.createdAt,
+                };
+            }),
+        },
     });
 });
 router.get("/full", User, async (req: Request, res: Response) => {
@@ -145,7 +155,7 @@ router.get("/full", User, async (req: Request, res: Response) => {
         where: {
             uuid: req.params.uuid,
         },
-        select: {
+        include: {
             comments: {
                 select: {
                     content: true,
@@ -159,29 +169,23 @@ router.get("/full", User, async (req: Request, res: Response) => {
                     postedAt: true,
                 },
             },
-            uuid: true,
-            name: true,
-            description: true,
-            address: true,
-            createdAt: true,
-            disabled: true,
-            verified: true,
-            approved: true,
-            owner: true,
-            tags: true,
-            updatedAt: true,
-            votes: true,
-            code: true,
         },
     });
 
-    if (!server)
+    if (server && req.user.admin)
+        return res.json({
+            success: true,
+            message: "Successfully fetched data for this server.",
+            data: server,
+        });
+
+    if (!server || server.disabled)
         return res.status(400).json({
             success: false,
             message: "Could not find a server with that UUID.",
         });
 
-    if (server.owner !== req.user.uuid && !req.user.admin) {
+    if (server.owner !== req.user.uuid) {
         return res.status(403).json({
             success: false,
             message: "You do not have permission to view this information.",
@@ -189,7 +193,7 @@ router.get("/full", User, async (req: Request, res: Response) => {
     }
     return res.json({
         success: true,
-        message: "Successfully fetched data for server " + server.uuid,
+        message: "Successfully fetched data for this server.",
         data: server,
     });
 });
@@ -285,6 +289,10 @@ router.put(
             type: "string",
         },
         {
+            name: "discord",
+            type: "string",
+        },
+        {
             name: "tags",
             type: "object",
         },
@@ -297,13 +305,31 @@ router.put(
                 message: "Request did not contain a body.",
             });
 
-        const { name, description } = req.body;
+        const { name, description, discord } = req.body;
         const tags: string[] = req.body.tags;
 
-        if (!name && !description && !tags)
+        if (!name && !description && !discord && !tags)
             return res.status(400).json({
                 success: false,
                 message: "No fields specified that can be updated.",
+            });
+
+        if (name && name.length > 100)
+            return res.status(400).json({
+                success: false,
+                message: "The server name specified is too long!",
+            });
+
+        if (description && description.length > 1500)
+            return res.status(400).json({
+                success: false,
+                message: "The server description specified is too long!",
+            });
+
+        if (discord && discord.length > 10)
+            return res.status(400).json({
+                success: false,
+                message: "The Discord invite code specified is too long.",
             });
 
         if (tags && !Array.isArray(tags))
@@ -350,6 +376,7 @@ router.put(
                 name: name ?? server.name,
                 description: description ?? server.description,
                 tags: tags ?? server.tags,
+                discord: discord ?? server.discord,
                 updatedAt: new Date(),
             },
         });
