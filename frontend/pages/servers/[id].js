@@ -47,15 +47,16 @@ const ReactMarkdown = dynamic(() => import("react-markdown"));
 // const moment = dynamic(() => import("moment"));
 import moment from "moment";
 import {
-    LineChart,
-    Line,
-    CartesianGrid,
-    XAxis,
-    YAxis,
-    ResponsiveContainer,
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
     Tooltip,
-} from "recharts";
-
+    Legend,
+  } from 'chart.js';
+import { Line } from 'react-chartjs-2';
 const badges = {
     PVP: {
         color: "#ff6565",
@@ -98,6 +99,15 @@ const badges = {
         icon: <FaQuestion />,
     },
 };
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Tooltip,
+    Legend
+  );
 
 export default function ServerInfo() {
     const [serverInfo, setServerInfo] = useState(null);
@@ -237,7 +247,9 @@ export default function ServerInfo() {
         }
         setVoting(false);
     };
-
+    const pcOptions = {
+        responsive: true,
+    }
     useEffect(() => {
         api.getServer(id)
             .then((data) => {
@@ -245,31 +257,60 @@ export default function ServerInfo() {
                 api.getAnalytics(id)
                     .then(async ({ data }) => {
                         const analytics = {
-                            playerCount: [],
-                            uptime: [],
+                            playerCount: {
+                                labels: [],
+                                data: [],
+                            },
+                            uptime: {
+                                labels: [],
+                                data: [],
+                            },
                         };
+                        const pcData = {
+                            labels: [],
+                            datasets: [{
+                                label: "Player Count",
+                                data: [],
+                                backgroundColor: "rgb(251, 132, 100)",
+                                borderColor: "rgb(251, 132, 100)",
+                                }
+                            ],
+                        }
+                        const uptimeData = {
+                            labels: [],
+                            datasets: [{
+                                label: "Uptime",
+                                data: [],
+                                backgroundColor: "rgb(251, 132, 100)",
+                                borderColor: "rgb(251, 132, 100)",
+                                }
+                            ],
+                        }
                         await Promise.all(
                             data.playerCount.map((stat) => {
-                                analytics.playerCount.push({
-                                    playerCount: stat.playerCount,
-                                    createdAt: moment(stat.createdAt).format(
+                                pcData.datasets[0].data.push(
+                                    stat.playerCount,
+                                )
+                                pcData.labels.push(
+                                    moment(stat.createdAt).format(
                                         "HH:mm"
                                     ),
-                                })
+                                )
                             }),
                             data.uptime.map((stat) => {
-                                analytics.uptime.push({
-                                    up: stat.up,
-                                    createdAt: moment(stat.createdAt).format(
+                                uptimeData.datasets[0].data.push(
+                                    stat.up
+                                )
+                                uptimeData.labels.push(
+                                    moment(stat.createdAt).format(
                                         "HH:mm"
                                     ),
-                                });
+                                )
                             })
                         );
-                        setServerAnalytics(analytics);
+                        setServerAnalytics({"pc": pcData, "uptime": uptimeData});
                         setLoading(false);
                     })
-                    .catch(() => setLoading(false));
             })
             .catch(() => setLoading(false));
     }, [user]);
@@ -584,39 +625,7 @@ export default function ServerInfo() {
                                                     style={{ width: "100%" }}
                                                 >
                                                     <h3>Player Count</h3>
-                                                    <ResponsiveContainer
-                                                        width="100%"
-                                                        height={350}
-                                                    >
-                                                        <LineChart
-                                                            data={
-                                                                serverAnalytics.playerCount
-                                                            }
-                                                            margin={{
-                                                                top: 5,
-                                                                right: 20,
-                                                                bottom: 5,
-                                                                left: 0,
-                                                            }}
-                                                        >
-                                                            <Line
-                                                                type="monotone"
-                                                                dataKey="playerCount"
-                                                                stroke="#fb8464"
-                                                            />
-                                                            <CartesianGrid
-                                                                stroke="#ccc"
-                                                                strokeDasharray="5 5"
-                                                            />
-                                                            <XAxis dataKey="createdAt" />
-                                                            <YAxis />
-                                                            <Tooltip
-                                                                content={
-                                                                    <PlayerTooltip />
-                                                                }
-                                                            />
-                                                        </LineChart>
-                                                    </ResponsiveContainer>
+                                                    <Line options={pcOptions} data={serverAnalytics.pc} />
                                                 </div>
                                                 <div
                                                     className={
@@ -624,43 +633,8 @@ export default function ServerInfo() {
                                                     }
                                                     style={{ width: "100%" }}
                                                 >
-                                                    <h3>Server Uptime</h3>
-                                                    <ResponsiveContainer
-                                                        width="100%"
-                                                        height={350}
-                                                    >
-                                                        <LineChart
-                                                            data={
-                                                                serverAnalytics.uptime
-                                                            }
-                                                            margin={{
-                                                                top: 5,
-                                                                right: 20,
-                                                                bottom: 5,
-                                                                left: 0,
-                                                            }}
-                                                        >
-                                                            <Line
-                                                                type="monotone"
-                                                                dataKey="up"
-                                                                stroke="#fb8464"
-                                                            />
-                                                            <CartesianGrid
-                                                                stroke="#ccc"
-                                                                strokeDasharray="5 5"
-                                                            />
-                                                            <XAxis dataKey="createdAt" />
-                                                            <Tooltip
-                                                                content={
-                                                                    <Uptime
-                                                                        name={
-                                                                            serverInfo.name
-                                                                        }
-                                                                    />
-                                                                }
-                                                            />
-                                                        </LineChart>
-                                                    </ResponsiveContainer>
+                                                    <h3>Uptime</h3>
+                                                    <Line options={pcOptions} data={serverAnalytics.uptime} />
                                                 </div>
                                             </div>
                                         ) : (
