@@ -15,6 +15,14 @@
     user-select: none;
 }
 
+.spacer {
+    margin: 0 10px 0 5px;
+    width: 3px;
+    height: 70%;
+    border-radius: 5px;
+    background-color: #383838;
+}
+
 .logo {
     margin: 0;
     padding: 0;
@@ -58,7 +66,7 @@
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    gap: 5px;
+    gap: 10px;
     color: #fff;
     cursor: pointer;
     transition: 0.2s all ease-in-out;
@@ -72,6 +80,10 @@
 .navElements li:active {
     background-color: #1e1e1e;
     transition: 0.2s all ease-in-out;
+}
+
+.navElements li > svg {
+    font-size: 20px;
 }
 
 .active {

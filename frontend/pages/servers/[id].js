@@ -19,7 +19,6 @@ import Reaptcha from "reaptcha";
 import Card from "../../components/card";
 import { GiStoneBlock, GiSwordsEmblem } from "react-icons/gi";
 import { RiTeamFill } from "react-icons/ri";
-import { LineChart, Line, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Tooltip} from 'recharts';
 import Timestamp from "react-timestamp";
 import Badge from "../../components/badge";
 import {
@@ -45,6 +44,17 @@ import {
     MdAnalytics,
 } from "react-icons/md";
 const ReactMarkdown = dynamic(() => import("react-markdown"));
+// const moment = dynamic(() => import("moment"));
+import moment from "moment";
+import {
+    LineChart,
+    Line,
+    CartesianGrid,
+    XAxis,
+    YAxis,
+    ResponsiveContainer,
+    Tooltip,
+} from "recharts";
 
 const badges = {
     PVP: {
@@ -155,25 +165,29 @@ export default function ServerInfo() {
     };
     const PlayerTooltip = ({ active, payload, label }) => {
         if (active && payload && payload.length) {
-          return (
-            <div className={styles.ToolTip}>
-                <p>{`${payload[0].value} Players`}</p>
-            </div>
-          );
+            return (
+                <div className={styles.ToolTip}>
+                    <p>{`${payload[0].value} Players`}</p>
+                </div>
+            );
         }
-      
+
         return null;
     };
     const Uptime = ({ active, payload, label, name }) => {
-    if (active && payload && payload.length) {
-        return (
-        <div className={styles.ToolTip}>
-            {payload[0].value == 1 ? (<p>{`${name} is up at this time`}</p>) : (<p>{`${name} is down at this time.`}</p>)}
-        </div>
-        );
-    }
-    
-    return null;
+        if (active && payload && payload.length) {
+            return (
+                <div className={styles.ToolTip}>
+                    {payload[0].value == 1 ? (
+                        <p>{`${name} is up at this time`}</p>
+                    ) : (
+                        <p>{`${name} is down at this time.`}</p>
+                    )}
+                </div>
+            );
+        }
+
+        return null;
     };
     const handleVote = async (captcha) => {
         setVoteValue(null);
@@ -228,11 +242,34 @@ export default function ServerInfo() {
         api.getServer(id)
             .then((data) => {
                 setServerInfo(data.data);
-                api.getAnalytics(id).then((data) => {
-                    setServerAnalytics(data.data);
-                    setLoading(false);
-                })
-                .catch(() => setLoading(false));
+                api.getAnalytics(id)
+                    .then(async ({ data }) => {
+                        const analytics = {
+                            playerCount: [],
+                            uptime: [],
+                        };
+                        await Promise.all(
+                            data.playerCount.map((stat) => {
+                                analytics.playerCount.push({
+                                    playerCount: stat.playerCount,
+                                    createdAt: moment(stat.createdAt).format(
+                                        "HH:mm"
+                                    ),
+                                })
+                            }),
+                            data.uptime.map((stat) => {
+                                analytics.uptime.push({
+                                    up: stat.up,
+                                    createdAt: moment(stat.createdAt).format(
+                                        "HH:mm"
+                                    ),
+                                });
+                            })
+                        );
+                        setServerAnalytics(analytics);
+                        setLoading(false);
+                    })
+                    .catch(() => setLoading(false));
             })
             .catch(() => setLoading(false));
     }, [user]);
@@ -323,9 +360,7 @@ export default function ServerInfo() {
                                     <h3>
                                         Created at{" "}
                                         <Timestamp
-                                            date={
-                                                serverInfo.createdAt
-                                            }
+                                            date={serverInfo.createdAt}
                                         />
                                     </h3>
                                     <div className={styles.badgeContainer}>
@@ -346,9 +381,13 @@ export default function ServerInfo() {
                                         icon={<FaServer />}
                                         text="Server Info"
                                     >
-                                        <div className={styles.flexRow} style={{
-                                            gap: "25px",
-                                        }}>
+                                        <div
+                                            className={styles.flexRow}
+                                            style={{
+                                                gap: "25px",
+                                                alignItems: "stretch",
+                                            }}
+                                        >
                                             <div className={styles.flexColumn}>
                                                 <h3>Address</h3>
                                                 <p>
@@ -363,12 +402,24 @@ export default function ServerInfo() {
                                             </div>
                                             <div className={styles.flexColumn}>
                                                 <h3>Discord Server</h3>
-                                                <Button
-                                                    icon={<FaDiscord />}
-                                                    color="#5865F2"
-                                                >
-                                                    Join Discord
-                                                </Button>
+                                                {serverInfo.discord ? (
+                                                    <Button
+                                                        icon={<FaDiscord />}
+                                                        color="#5865F2"
+                                                    >
+                                                        Join Discord
+                                                    </Button>
+                                                ) : (
+                                                    <p
+                                                        style={{
+                                                            color: "#ff6565",
+                                                        }}
+                                                    >
+                                                        This server has not
+                                                        provided a Discord
+                                                        invite.
+                                                    </p>
+                                                )}
                                             </div>
                                         </div>
                                     </Card>
@@ -388,9 +439,12 @@ export default function ServerInfo() {
                                             </span>{" "}
                                             votes.
                                         </p>
-                                        <div className={styles.flexRow} style={{
-                                            gap: "10px",
-                                        }}>
+                                        <div
+                                            className={styles.flexRow}
+                                            style={{
+                                                gap: "10px",
+                                            }}
+                                        >
                                             {user ? (
                                                 voting ? (
                                                     <CircularProgress
@@ -459,10 +513,13 @@ export default function ServerInfo() {
                                             icon={<MdShield />}
                                             text="Admin Actions"
                                         >
-                                            <div className={styles.flexRow} style={{
-                                                flexWrap: "wrap",
-                                                gap: "10px",
-                                            }}>
+                                            <div
+                                                className={styles.flexRow}
+                                                style={{
+                                                    flexWrap: "wrap",
+                                                    gap: "10px",
+                                                }}
+                                            >
                                                 <Button
                                                     icon={<MdInsertChart />}
                                                     iconColor="#ff6565"
@@ -491,6 +548,14 @@ export default function ServerInfo() {
                                                 >
                                                     Owner Override
                                                 </Button>
+                                                <Button
+                                                    icon={<FaUserCog />}
+                                                    iconColor="#ff6565"
+                                                    color="#202020"
+                                                    onClick={() => console.log(serverAnalytics)}
+                                                >
+                                                    Debug Analytics
+                                                </Button>
                                             </div>
                                         </Card>
                                     )}
@@ -511,31 +576,93 @@ export default function ServerInfo() {
                                         text="Analytics"
                                     >
                                         {serverAnalytics ? (
-                                        <div className={styles.flexRow}>
-                                            <div className={styles.flexColumn} style={{width: "100%"}}>
-                                                <h3>Player Count</h3>
-                                                <ResponsiveContainer width="100%" height={350}>
-                                                    <LineChart data={serverAnalytics.PlayerCount} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
-                                                        <Line type="monotone" dataKey="playercount" stroke="#fb8464" />
-                                                        <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
-                                                        <XAxis dataKey="createdAt" />
-                                                        <YAxis />
-                                                        <Tooltip content={<PlayerTooltip />} />
-                                                    </LineChart>
-                                                </ResponsiveContainer>
+                                            <div className={styles.flexRow}>
+                                                <div
+                                                    className={
+                                                        styles.flexColumn
+                                                    }
+                                                    style={{ width: "100%" }}
+                                                >
+                                                    <h3>Player Count</h3>
+                                                    <ResponsiveContainer
+                                                        width="100%"
+                                                        height={350}
+                                                    >
+                                                        <LineChart
+                                                            data={
+                                                                serverAnalytics.playerCount
+                                                            }
+                                                            margin={{
+                                                                top: 5,
+                                                                right: 20,
+                                                                bottom: 5,
+                                                                left: 0,
+                                                            }}
+                                                        >
+                                                            <Line
+                                                                type="monotone"
+                                                                dataKey="playerCount"
+                                                                stroke="#fb8464"
+                                                            />
+                                                            <CartesianGrid
+                                                                stroke="#ccc"
+                                                                strokeDasharray="5 5"
+                                                            />
+                                                            <XAxis dataKey="createdAt" />
+                                                            <YAxis />
+                                                            <Tooltip
+                                                                content={
+                                                                    <PlayerTooltip />
+                                                                }
+                                                            />
+                                                        </LineChart>
+                                                    </ResponsiveContainer>
+                                                </div>
+                                                <div
+                                                    className={
+                                                        styles.flexColumn
+                                                    }
+                                                    style={{ width: "100%" }}
+                                                >
+                                                    <h3>Server Uptime</h3>
+                                                    <ResponsiveContainer
+                                                        width="100%"
+                                                        height={350}
+                                                    >
+                                                        <LineChart
+                                                            data={
+                                                                serverAnalytics.uptime
+                                                            }
+                                                            margin={{
+                                                                top: 5,
+                                                                right: 20,
+                                                                bottom: 5,
+                                                                left: 0,
+                                                            }}
+                                                        >
+                                                            <Line
+                                                                type="monotone"
+                                                                dataKey="up"
+                                                                stroke="#fb8464"
+                                                            />
+                                                            <CartesianGrid
+                                                                stroke="#ccc"
+                                                                strokeDasharray="5 5"
+                                                            />
+                                                            <XAxis dataKey="createdAt" />
+                                                            <Tooltip
+                                                                content={
+                                                                    <Uptime
+                                                                        name={
+                                                                            serverInfo.name
+                                                                        }
+                                                                    />
+                                                                }
+                                                            />
+                                                        </LineChart>
+                                                    </ResponsiveContainer>
+                                                </div>
                                             </div>
-                                            <div className={styles.flexColumn} style={{width: "100%"}}>
-                                                <h3>Server Uptime</h3>
-                                                <ResponsiveContainer width="100%" height={350}>
-                                                    <LineChart data={serverAnalytics.uptime} margin={{ top: 5, right: 20, bottom: 5, left: 0 }}>
-                                                        <Line type="monotone" dataKey="up" stroke="#fb8464" />
-                                                        <CartesianGrid stroke="#ccc" strokeDasharray="5 5" />
-                                                        <XAxis dataKey="createdAt" />
-                                                        <Tooltip content={<Uptime name={serverInfo.name} />} />
-                                                    </LineChart>
-                                                </ResponsiveContainer>
-                                            </div>
-                                        </div>
                                         ) : (
                                             <p>No server analytics... yet.</p>
                                         )}

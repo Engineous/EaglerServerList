@@ -1,12 +1,10 @@
 import { useUser } from "../user";
 import { useRouter } from "next/router";
 import styles from "./Navbar.module.css";
-import HomeIcon from "@mui/icons-material/Home";
-import StorageIcon from "@mui/icons-material/Storage";
 import Link from "next/link";
 import Button from "../button";
-import { FaDiscord } from "react-icons/fa";
-import { MdArrowForward } from "react-icons/md";
+import { FaDiscord, FaHome, FaServer } from "react-icons/fa";
+import { MdArrowForward, MdShield } from "react-icons/md";
 import api from "../../api";
 
 const Avatar = () => {
@@ -39,15 +37,22 @@ const Navbar = () => {
         {
             href: "/",
             name: "Home",
-            icon: <HomeIcon />,
+            icon: <FaHome color="#fb8464" />,
+            visible: true,
         },
-    ];
-    if (user)
-        navElements.push({
+        {
             href: "/servers",
             name: "Your Servers",
-            icon: <StorageIcon />,
-        });
+            icon: <FaServer color="#fb8464" />,
+            visible: user != null,
+        },
+        {
+            href: "/admin",
+            name: "Admin Panel",
+            icon: <MdShield color="#ff6565" />,
+            visible: user && user.admin,
+        },
+    ];
 
     return (
         <nav className={styles.root}>
@@ -55,6 +60,7 @@ const Navbar = () => {
                 <img src="/eagler.png" />
                 <h1>Eagler Server List</h1>
             </div>
+            <div className={styles.spacer} />
             <ul className={styles.navElements}>
                 {navElements.map((navElement, index) => {
                     if (router.pathname == navElement.href)

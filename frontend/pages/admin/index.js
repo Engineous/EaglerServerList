@@ -1,22 +1,24 @@
-import Head from "next/head";
 import styles from "../../styles/Home.module.css";
+import Head from "next/head";
 import Navbar from "../../components/navbar";
 import { useUser } from "../../components/user";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 
-export default function Servers() {
+const Admin = () => {
     const { user } = useUser();
     const router = useRouter();
 
     useEffect(() => {
-        if (!user) router.push("/");
-    }, [user]);
+        if (!user) return router.push("/");
+
+        if (!user.admin) return router.push("/");
+    });
 
     return (
         <>
             <Head>
-                <title>Eagler Server List | Your Servers</title>
+                <title>Eagler Server List | Admin Panel</title>
                 <meta
                     name="viewport"
                     content="width=device-width, initial-scale=1, shrink-to-fit=no"
@@ -33,7 +35,7 @@ export default function Servers() {
                 <meta property="theme-color" content="#FB8464" />
                 <meta
                     property="og:title"
-                    content="Eagler Server List - Your Servers"
+                    content="Eagler Server List - Admin Panel"
                 />
                 <meta property="og:type" content="website" />
                 <link rel="icon" href="/favicon.ico" />
@@ -41,10 +43,12 @@ export default function Servers() {
             <div>
                 <Navbar />
                 <div className={styles.homeRoot}>
-                    <h1>Your Servers</h1>
-                    <p>Manage the servers that you own.</p>
+                    <h1>Admin Panel</h1>
+                    <p>Under Construction</p>
                 </div>
             </div>
         </>
     );
-}
+};
+
+export default Admin;
