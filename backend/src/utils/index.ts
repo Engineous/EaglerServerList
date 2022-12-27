@@ -1,4 +1,5 @@
 import axios from "axios";
+import getLogger from "logging";
 
 const randomString = (
     length: number,
@@ -23,5 +24,6 @@ const validateCaptcha = (captchaResponse: string) =>
             })
             .catch(reject)
     );
+const logger = getLogger("backend");
 
-export { randomString, daysFromNow, validateCaptcha };
+export { randomString, daysFromNow, validateCaptcha, logger };

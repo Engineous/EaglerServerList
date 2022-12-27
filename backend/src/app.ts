@@ -1,4 +1,5 @@
 import express, { NextFunction, Request, Response } from "express";
+import { logger } from "./utils";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import RootRouter from "./routes";
@@ -22,13 +23,14 @@ app.use(
         ],
     })
 );
-app.use((_err: Error, _req: Request, res: Response, _next: NextFunction) =>
+app.use((_err: Error, _req: Request, res: Response, _next: NextFunction) => {
+    logger.warn("Request contained malformed JSON data.");
     res.status(400).json({
         success: false,
         message:
             "Body of request contained malformed JSON data. Check your syntax.",
-    })
-);
+    });
+});
 
 app.use("/", RootRouter);
 

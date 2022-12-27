@@ -1,6 +1,7 @@
 import { config } from "dotenv";
 import prisma from "./db";
 import listen from "./app";
+import { logger } from "./utils";
 config();
 
 const requiredEnvVariables = [
@@ -15,8 +16,8 @@ for (const env of requiredEnvVariables)
     if (!process.env.hasOwnProperty(env)) errors.push(env);
 
 if (errors.length > 0) {
-    console.log(`Missing environment variables: ${errors.join(", ")}`);
-    console.log(`Aborting startup...`);
+    logger.error(`Missing environment variables: ${errors.join(", ")}`);
+    logger.info(`Aborting startup...`);
     process.exit(255);
 }
 
@@ -27,13 +28,12 @@ const verifyConnection = () =>
     });
 
 verifyConnection().then(() => {
-    console.log("Verified connection to database");
+    logger.info("Established a connection to the database.");
     listen(parseInt(process.env.PORT!)).then(() =>
-        console.log(
-            `Backend is successfully running on port ${process.env.PORT!}`
-        )
+        logger.info(`Successfully running on port ${process.env.PORT!}`)
     );
     setInterval(async () => {
+        logger.info("Running vote cooldown check...");
         const cooldowns = await prisma.voteCooldown.findMany().catch(() => {});
         if (!cooldowns) return;
         await Promise.all(
@@ -45,6 +45,11 @@ verifyConnection().then(() => {
                                 uuid: cooldown.uuid,
                             },
                         })
+                        .then(() =>
+                            logger.info(
+                                `Successfully removed vote cooldown for user ${cooldown.userId} and server ${cooldown.serverId}`
+                            )
+                        )
                         .catch(() => {});
             })
         );

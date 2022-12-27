@@ -15,7 +15,7 @@ type FieldWithType = {
 };
 
 const ExplicitTypesOnFields = (fields: FieldWithType[]) => {
-    return (req: Request, res: Response, next: NextFunction) => {
+    return (req: Request, _res: Response, next: NextFunction) => {
         if (!req.body) return next();
 
         for (const field in fields) {
