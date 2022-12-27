@@ -9,6 +9,7 @@
     align-items: center;
     justify-content: center;
     gap: 5px;
+    max-width: 270px;
     cursor: pointer;
     transition: 0.2s all ease-in-out;
 }

@@ -1,6 +1,7 @@
 import styles from "./Modal.module.css";
 import { useState, forwardRef, useImperativeHandle } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { AiOutlineClose } from "react-icons/ai";
 
 const Modal = forwardRef(({ height, children }, ref) => {
     const [open, setOpen] = useState(false);
@@ -11,6 +12,7 @@ const Modal = forwardRef(({ height, children }, ref) => {
             close: () => setOpen(false),
         };
     });
+
     return (
         <AnimatePresence>
             {open && (
@@ -81,5 +83,16 @@ const Modal = forwardRef(({ height, children }, ref) => {
         </AnimatePresence>
     );
 });
+
+Modal.Title = ({ children, onClose }) => (
+    <div className={styles.titleBar}>
+        {children}
+        <button className={styles.titleBarClose} onClick={onClose}>
+            <AiOutlineClose />
+        </button>
+    </div>
+);
+
+Modal.Body = ({ children }) => <div className={styles.body}>{children}</div>;
 
 export default Modal;

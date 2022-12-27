@@ -1,11 +1,10 @@
 import Head from "next/head";
-import Script from "next/script";
 import styles from "../styles/Home.module.css";
 import Navbar from "../components/navbar";
 import { InnerLoading } from "../components/loading";
 import { useEffect, useState } from "react";
 import api from "../api";
-import Server from "../components/server";
+import { Server } from "../components/server";
 import { useNotification } from "../components/notification";
 
 export default function Home() {

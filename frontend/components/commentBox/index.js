@@ -1,4 +1,4 @@
-import styles from "./Input.module.css";
+import styles from "./CommentBox.module.css";
 import { MdSend } from "react-icons/md";
 import { CircularProgress } from "@mui/material";
 

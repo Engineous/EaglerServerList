@@ -1,255 +1,23 @@
 import { useUser } from "../../components/user";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
-import { IoMdThumbsUp, IoMdThumbsDown } from "react-icons/io";
-import { CircularProgress } from "@mui/material";
 import { InnerLoading } from "../../components/loading";
-import { GoVerified } from "react-icons/go";
-import { useNotification } from "../../components/notification";
+import { ServerInfo } from "../../components/server";
 import Head from "next/head";
-import dynamic from "next/dynamic";
+import { useRouter } from "next/router";
 import styles from "../../styles/Server.module.css";
 import Navbar from "../../components/navbar";
-import Button from "../../components/button";
-import CommentBox from "../../components/commentBox";
-import Comment from "../../components/comment";
 import api from "../../api";
 import Link from "next/link";
-import Reaptcha from "reaptcha";
-import Card from "../../components/card";
-import { GiStoneBlock, GiSwordsEmblem } from "react-icons/gi";
-import { RiTeamFill } from "react-icons/ri";
-import Timestamp from "react-timestamp";
-import Badge from "../../components/badge";
-import {
-    FaCommentAlt,
-    FaCommentSlash,
-    FaDiscord,
-    FaGamepad,
-    FaQuestion,
-    FaServer,
-    FaSkull,
-    FaTools,
-    FaUserCog,
-    FaUserFriends,
-} from "react-icons/fa";
-import {
-    MdGames,
-    MdFastfood,
-    MdInsertChart,
-    MdLocalPolice,
-    MdShield,
-    MdVisibilityOff,
-    MdDescription,
-    MdAnalytics,
-} from "react-icons/md";
-const ReactMarkdown = dynamic(() => import("react-markdown"));
-// const moment = dynamic(() => import("moment"));
 import moment from "moment";
-import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend,
-  } from 'chart.js';
-import { Line } from 'react-chartjs-2';
-const badges = {
-    PVP: {
-        color: "#ff6565",
-        icon: <GiSwordsEmblem />,
-    },
-    PVE: {
-        color: "#ff6565",
-        icon: <FaSkull />,
-    },
-    FACTIONS: {
-        color: "#ff6565",
-        icon: <RiTeamFill />,
-    },
-    MINIGAMES: {
-        color: "#f7ff65",
-        icon: <MdGames />,
-    },
-    SURVIVAL: {
-        color: "#46e393",
-        icon: <MdFastfood />,
-    },
-    CREATIVE: {
-        color: "#46e393",
-        icon: <FaTools />,
-    },
-    SKYBLOCK: {
-        color: "#46e393",
-        icon: <GiStoneBlock />,
-    },
-    PRISON: {
-        color: "#ff6565",
-        icon: <MdLocalPolice />,
-    },
-    RPG: {
-        color: "#ff6565",
-        icon: <FaGamepad />,
-    },
-    MISCELLANEOUS: {
-        color: "#46e393",
-        icon: <FaQuestion />,
-    },
-};
-ChartJS.register(
-    CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend
-  );
 
-export default function ServerInfo() {
+export default function Server() {
     const [serverInfo, setServerInfo] = useState(null);
-    const [commentContent, setCommentContent] = useState("");
-    const [postingComment, setPostingComment] = useState(false);
-    const [voteCaptcha, setVoteCaptcha] = useState(null);
-    const [commentCaptcha, setCommentCaptcha] = useState(null);
-    const [voteValue, setVoteValue] = useState(null);
-    const [voting, setVoting] = useState(false);
-    const [loading, setLoading] = useState(true);
     const [serverAnalytics, setServerAnalytics] = useState(null);
+    const [loading, setLoading] = useState(true);
     const { user } = useUser();
     const router = useRouter();
-    const notify = useNotification();
     const { id } = router.query;
 
-    const postComment = async (captcha) => {
-        commentCaptcha.reset();
-        setPostingComment(true);
-
-        try {
-            const data = await api.postComment({
-                uuid: serverInfo.uuid,
-                content: commentContent,
-                captcha,
-            });
-            if (data.success) {
-                setServerInfo({
-                    ...serverInfo,
-                    comments: [...serverInfo.comments, data.data],
-                });
-                notify({
-                    type: "success",
-                    content: "Successfully posted comment.",
-                });
-            }
-        } catch (err) {
-            if (err.response && err.response.status == 429) {
-                const retryAfter = err.response.headers["retry-after"];
-                notify({
-                    type: "error",
-                    content: `You are being rate limited.${
-                        retryAfter
-                            ? ` Please retry after ${retryAfter} seconds.`
-                            : ""
-                    }`,
-                });
-            } else if (
-                !err.response ||
-                !err.response.data ||
-                !err.response.data.message
-            )
-                notify({
-                    type: "error",
-                    content: "An unknown error occurred.",
-                });
-            else
-                notify({
-                    type: "error",
-                    content: err.response.data.message,
-                });
-        }
-        setPostingComment(false);
-        setCommentContent("");
-    };
-    const PlayerTooltip = ({ active, payload, label }) => {
-        if (active && payload && payload.length) {
-            return (
-                <div className={styles.ToolTip}>
-                    <p>{`${payload[0].value} Players`}</p>
-                </div>
-            );
-        }
-
-        return null;
-    };
-    const Uptime = ({ active, payload, label, name }) => {
-        if (active && payload && payload.length) {
-            return (
-                <div className={styles.ToolTip}>
-                    {payload[0].value == 1 ? (
-                        <p>{`${name} is up at this time`}</p>
-                    ) : (
-                        <p>{`${name} is down at this time.`}</p>
-                    )}
-                </div>
-            );
-        }
-
-        return null;
-    };
-    const handleVote = async (captcha) => {
-        setVoteValue(null);
-        voteCaptcha.reset();
-        setVoting(true);
-        try {
-            const data = await api.vote({
-                id: serverInfo.uuid,
-                value: voteValue,
-                captcha,
-            });
-            if (data.success) {
-                setServerInfo({
-                    ...serverInfo,
-                    votes: data.data.votes,
-                });
-                notify({
-                    type: "success",
-                    content: "Successfully voted for this server.",
-                });
-            }
-        } catch (err) {
-            if (err.response && err.response.status == 429) {
-                const retryAfter = err.response.headers["retry-after"];
-                notify({
-                    type: "error",
-                    content: `You are being rate limited.${
-                        retryAfter
-                            ? ` Please retry after ${retryAfter} seconds.`
-                            : ""
-                    }`,
-                });
-            } else if (
-                !err.response ||
-                !err.response.data ||
-                !err.response.data.message
-            )
-                notify({
-                    type: "error",
-                    content: "An unknown error occurred.",
-                });
-            else
-                notify({
-                    type: "error",
-                    content: err.response.data.message,
-                });
-        }
-        setVoting(false);
-    };
-    const pcOptions = {
-        responsive: true,
-    }
     useEffect(() => {
         api.getServer(id)
             .then((data) => {
@@ -268,49 +36,44 @@ export default function ServerInfo() {
                         };
                         const pcData = {
                             labels: [],
-                            datasets: [{
-                                label: "Player Count",
-                                data: [],
-                                backgroundColor: "rgb(251, 132, 100)",
-                                borderColor: "rgb(251, 132, 100)",
-                                }
+                            datasets: [
+                                {
+                                    label: "Player Count",
+                                    data: [],
+                                    backgroundColor: "rgb(251, 132, 100)",
+                                    borderColor: "rgb(251, 132, 100)",
+                                },
                             ],
-                        }
+                        };
                         const uptimeData = {
                             labels: [],
-                            datasets: [{
-                                label: "Uptime",
-                                data: [],
-                                backgroundColor: "rgb(251, 132, 100)",
-                                borderColor: "rgb(251, 132, 100)",
-                                }
+                            datasets: [
+                                {
+                                    label: "Uptime",
+                                    data: [],
+                                    backgroundColor: "rgb(251, 132, 100)",
+                                    borderColor: "rgb(251, 132, 100)",
+                                },
                             ],
-                        }
+                        };
                         await Promise.all(
                             data.playerCount.map((stat) => {
-                                pcData.datasets[0].data.push(
-                                    stat.playerCount,
-                                )
+                                pcData.datasets[0].data.push(stat.playerCount);
                                 pcData.labels.push(
-                                    moment(stat.createdAt).format(
-                                        "HH:mm"
-                                    ),
-                                )
+                                    moment(stat.createdAt).format("HH:mm")
+                                );
                             }),
                             data.uptime.map((stat) => {
-                                uptimeData.datasets[0].data.push(
-                                    stat.up
-                                )
+                                uptimeData.datasets[0].data.push(stat.up);
                                 uptimeData.labels.push(
-                                    moment(stat.createdAt).format(
-                                        "HH:mm"
-                                    ),
-                                )
+                                    moment(stat.createdAt).format("HH:mm")
+                                );
                             })
                         );
-                        setServerAnalytics({"pc": pcData, "uptime": uptimeData});
+                        setServerAnalytics({ pc: pcData, uptime: uptimeData });
                         setLoading(false);
                     })
+                    .catch(() => setLoading(false));
             })
             .catch(() => setLoading(false));
     }, [user]);
@@ -360,343 +123,10 @@ export default function ServerInfo() {
                 ) : (
                     <>
                         {serverInfo ? (
-                            <>
-                                {/* <div className={styles.center}>
-                                    <h1 className={styles.title}>
-                                        {serverInfo.name}{" "}
-                                        {serverInfo.approved && (
-                                            <GoVerified
-                                                color="#fb8464"
-                                                size={24}
-                                            />
-                                        )}
-                                    </h1>
-                                    <div className={styles.ownerAvatar}>
-                                        <img src={serverInfo.user.avatar} />
-                                        <Link
-                                            href={`/users/${serverInfo.user.uuid}`}
-                                        >
-                                            {serverInfo.user.username}
-                                        </Link>
-                                    </div>
-                                </div> */}
-                                <div className={styles.flexCenter}>
-                                    <h1>
-                                        {serverInfo.name}{" "}
-                                        {serverInfo.approved && (
-                                            <GoVerified
-                                                color="#fb8464"
-                                                size={28}
-                                            />
-                                        )}
-                                    </h1>
-                                    <div className={styles.ownerAvatar}>
-                                        <img src={serverInfo.user.avatar} />
-                                        <Link
-                                            href={`/users/${serverInfo.user.uuid}`}
-                                        >
-                                            {serverInfo.user.username}
-                                        </Link>
-                                    </div>
-                                    <h3>
-                                        Created at{" "}
-                                        <Timestamp
-                                            date={serverInfo.createdAt}
-                                        />
-                                    </h3>
-                                    <div className={styles.badgeContainer}>
-                                        {serverInfo.tags.map((tag, index) => (
-                                            <Badge
-                                                icon={badges[tag].icon}
-                                                color={badges[tag].color}
-                                                key={index}
-                                                inline
-                                            >
-                                                {tag}
-                                            </Badge>
-                                        ))}
-                                    </div>
-                                </div>
-                                <div className={styles.cardsRow}>
-                                    <Card
-                                        icon={<FaServer />}
-                                        text="Server Info"
-                                    >
-                                        <div
-                                            className={styles.flexRow}
-                                            style={{
-                                                gap: "25px",
-                                                alignItems: "stretch",
-                                            }}
-                                        >
-                                            <div className={styles.flexColumn}>
-                                                <h3>Address</h3>
-                                                <p>
-                                                    <span
-                                                        style={{
-                                                            fontWeight: "600",
-                                                        }}
-                                                    >
-                                                        {serverInfo.address}
-                                                    </span>
-                                                </p>
-                                            </div>
-                                            <div className={styles.flexColumn}>
-                                                <h3>Discord Server</h3>
-                                                {serverInfo.discord ? (
-                                                    <Button
-                                                        icon={<FaDiscord />}
-                                                        color="#5865F2"
-                                                    >
-                                                        Join Discord
-                                                    </Button>
-                                                ) : (
-                                                    <p
-                                                        style={{
-                                                            color: "#ff6565",
-                                                        }}
-                                                    >
-                                                        This server has not
-                                                        provided a Discord
-                                                        invite.
-                                                    </p>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </Card>
-                                    <Card icon={<MdInsertChart />} text="Votes">
-                                        <p>
-                                            This server has{" "}
-                                            <span
-                                                style={{
-                                                    color: `${
-                                                        serverInfo.votes > 0
-                                                            ? "#46e393"
-                                                            : "#ff6565"
-                                                    }`,
-                                                }}
-                                            >
-                                                {serverInfo.votes}
-                                            </span>{" "}
-                                            votes.
-                                        </p>
-                                        <div
-                                            className={styles.flexRow}
-                                            style={{
-                                                gap: "10px",
-                                            }}
-                                        >
-                                            {user ? (
-                                                voting ? (
-                                                    <CircularProgress
-                                                        size={36}
-                                                    />
-                                                ) : (
-                                                    <>
-                                                        <Button
-                                                            color="#202020"
-                                                            iconColor="#fb8464"
-                                                            icon={
-                                                                <IoMdThumbsUp />
-                                                            }
-                                                            onClick={() => {
-                                                                setVoteValue(
-                                                                    true
-                                                                );
-                                                                voteCaptcha.execute();
-                                                            }}
-                                                        >
-                                                            Nice!
-                                                        </Button>
-                                                        <Button
-                                                            color="#202020"
-                                                            iconColor="#fb8464"
-                                                            icon={
-                                                                <IoMdThumbsDown />
-                                                            }
-                                                            onClick={() => {
-                                                                setVoteValue(
-                                                                    false
-                                                                );
-                                                                voteCaptcha.execute();
-                                                            }}
-                                                        >
-                                                            Sh*t!
-                                                        </Button>
-                                                        <Reaptcha
-                                                            ref={(e) => {
-                                                                setVoteCaptcha(
-                                                                    e
-                                                                );
-                                                            }}
-                                                            sitekey={
-                                                                process.env
-                                                                    .NEXT_PUBLIC_RECAPTCHA_SITE_KEY
-                                                            }
-                                                            onVerify={(res) =>
-                                                                handleVote(res)
-                                                            }
-                                                            theme="dark"
-                                                            size="invisible"
-                                                        />
-                                                    </>
-                                                )
-                                            ) : (
-                                                <p style={{ color: "#ff6565" }}>
-                                                    You must login to be able to
-                                                    vote.
-                                                </p>
-                                            )}
-                                        </div>
-                                    </Card>
-                                    {user && user.admin && (
-                                        <Card
-                                            icon={<MdShield />}
-                                            text="Admin Actions"
-                                        >
-                                            <div
-                                                className={styles.flexRow}
-                                                style={{
-                                                    flexWrap: "wrap",
-                                                    gap: "10px",
-                                                }}
-                                            >
-                                                <Button
-                                                    icon={<MdInsertChart />}
-                                                    iconColor="#ff6565"
-                                                    color="#202020"
-                                                >
-                                                    Set Votes
-                                                </Button>
-                                                <Button
-                                                    icon={<MdVisibilityOff />}
-                                                    iconColor="#ff6565"
-                                                    color="#202020"
-                                                >
-                                                    Disable Server
-                                                </Button>
-                                                <Button
-                                                    icon={<FaCommentSlash />}
-                                                    iconColor="#ff6565"
-                                                    color="#202020"
-                                                >
-                                                    Clear Comments
-                                                </Button>
-                                                <Button
-                                                    icon={<FaUserCog />}
-                                                    iconColor="#ff6565"
-                                                    color="#202020"
-                                                >
-                                                    Owner Override
-                                                </Button>
-                                                <Button
-                                                    icon={<FaUserCog />}
-                                                    iconColor="#ff6565"
-                                                    color="#202020"
-                                                    onClick={() => console.log(serverAnalytics)}
-                                                >
-                                                    Debug Analytics
-                                                </Button>
-                                            </div>
-                                        </Card>
-                                    )}
-                                </div>
-                                <div className={styles.cardsRow}>
-                                    <Card
-                                        icon={<MdDescription />}
-                                        text="Description"
-                                    >
-                                        <ReactMarkdown>
-                                            {serverInfo.description}
-                                        </ReactMarkdown>
-                                    </Card>
-                                </div>
-                                <div className={styles.cardsRow}>
-                                    <Card
-                                        icon={<MdAnalytics />}
-                                        text="Analytics"
-                                    >
-                                        {serverAnalytics ? (
-                                            <div className={styles.flexRow}>
-                                                <div
-                                                    className={
-                                                        styles.flexColumn
-                                                    }
-                                                    style={{ width: "100%" }}
-                                                >
-                                                    <h3>Player Count</h3>
-                                                    <Line options={pcOptions} data={serverAnalytics.pc} />
-                                                </div>
-                                                <div
-                                                    className={
-                                                        styles.flexColumn
-                                                    }
-                                                    style={{ width: "100%" }}
-                                                >
-                                                    <h3>Uptime</h3>
-                                                    <Line options={pcOptions} data={serverAnalytics.uptime} />
-                                                </div>
-                                            </div>
-                                        ) : (
-                                            <p>No server analytics... yet.</p>
-                                        )}
-                                    </Card>
-                                </div>
-                                <div className={styles.cardsRow}>
-                                    <Card
-                                        icon={<FaCommentAlt />}
-                                        text="Comments"
-                                    >
-                                        {user ? (
-                                            <>
-                                                <CommentBox
-                                                    avatar={user.avatar}
-                                                    onChange={setCommentContent}
-                                                    value={commentContent}
-                                                    onClick={() => {
-                                                        commentCaptcha.execute();
-                                                    }}
-                                                    disabled={
-                                                        commentContent == ""
-                                                    }
-                                                    loading={postingComment}
-                                                />
-                                                <Reaptcha
-                                                    ref={(e) => {
-                                                        setCommentCaptcha(e);
-                                                    }}
-                                                    sitekey={
-                                                        process.env
-                                                            .NEXT_PUBLIC_RECAPTCHA_SITE_KEY
-                                                    }
-                                                    onVerify={(res) =>
-                                                        postComment(res)
-                                                    }
-                                                    theme="dark"
-                                                    size="invisible"
-                                                />
-                                            </>
-                                        ) : (
-                                            <p style={{ color: "#ff6565" }}>
-                                                You must login to be able to
-                                                post comments.
-                                            </p>
-                                        )}
-                                        {[]
-                                            .concat(serverInfo.comments)
-                                            .sort((a, b) =>
-                                                a.postedAt < b.postedAt ? 1 : -1
-                                            )
-                                            .map((comment, index) => (
-                                                <Comment
-                                                    comment={comment}
-                                                    key={index}
-                                                    inline
-                                                />
-                                            ))}
-                                    </Card>
-                                </div>
-                            </>
+                            <ServerInfo
+                                server={serverInfo}
+                                analytics={serverAnalytics}
+                            />
                         ) : (
                             <div
                                 style={{

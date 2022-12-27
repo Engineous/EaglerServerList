@@ -63,6 +63,7 @@ const Navbar = () => {
             <div className={styles.spacer} />
             <ul className={styles.navElements}>
                 {navElements.map((navElement, index) => {
+                    if (!navElement.visible) return;
                     if (router.pathname == navElement.href)
                         return (
                             <li

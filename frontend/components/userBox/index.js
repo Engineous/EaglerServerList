@@ -5,7 +5,7 @@ import Badge from "../badge";
 import { FaUserCircle, FaServer, FaCommentAlt } from "react-icons/fa";
 import Card from "../card";
 import { MdShield } from "react-icons/md";
-import Server from "../server";
+import { Server } from "../server";
 import Comment from "../comment";
 import { useUser } from "../user";
 import Button from "../button";
