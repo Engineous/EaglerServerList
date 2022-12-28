@@ -2,7 +2,8 @@ import { NextFunction, Request, Response, Router } from "express";
 import OAuthRouter from "./OAuthRouter";
 import ServersRouter from "./ServersRouter";
 import UsersRouter from "./UsersRouter";
-import { StringsOnly } from "../middleware";
+import AdminRouter from "./AdminRouter";
+import { Admin, StringsOnly } from "../middleware";
 import { logger } from "../utils";
 
 const router = Router();
@@ -17,6 +18,7 @@ router.use((req: Request, _res: Response, next: NextFunction) => {
 router.use("/oauth", StringsOnly, OAuthRouter);
 router.use("/users", UsersRouter);
 router.use("/servers", ServersRouter);
+router.use("/admin", Admin, AdminRouter);
 
 router.use((req: Request, res: Response, next: NextFunction) => {
     if (process.env.VERBOSE_LOG)
