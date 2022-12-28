@@ -1,11 +1,12 @@
 import Head from "next/head";
 import styles from "../styles/Home.module.css";
-import Navbar from "../components/navbar";
 import { InnerLoading } from "../components/loading";
 import { useEffect, useState } from "react";
 import api from "../api";
-import { Server } from "../components/server";
 import { useNotification } from "../components/notification";
+import dynamic from "next/dynamic";
+const Navbar = dynamic(() => import("../components/navbar"));
+const Server = dynamic(() => import("../components/server"));
 
 export default function Home() {
     const [loading, setLoading] = useState(true);

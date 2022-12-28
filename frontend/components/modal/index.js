@@ -3,7 +3,7 @@ import { useState, forwardRef, useImperativeHandle } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AiOutlineClose } from "react-icons/ai";
 
-const Modal = forwardRef(({ height, children }, ref) => {
+const Modal = forwardRef(({ height, title, children }, ref) => {
     const [open, setOpen] = useState(false);
 
     useImperativeHandle(ref, () => {
@@ -75,7 +75,16 @@ const Modal = forwardRef(({ height, children }, ref) => {
                             }}
                             className={styles.content}
                         >
-                            {children}
+                            <div className={styles.titleBar}>
+                                {title}
+                                <button
+                                    className={styles.titleBarClose}
+                                    onClick={() => ref.current.close()}
+                                >
+                                    <AiOutlineClose />
+                                </button>
+                            </div>
+                            <div className={styles.body}>{children}</div>
                         </motion.div>
                     </motion.div>
                 </>
@@ -83,16 +92,5 @@ const Modal = forwardRef(({ height, children }, ref) => {
         </AnimatePresence>
     );
 });
-
-Modal.Title = ({ children, onClose }) => (
-    <div className={styles.titleBar}>
-        {children}
-        <button className={styles.titleBarClose} onClick={onClose}>
-            <AiOutlineClose />
-        </button>
-    </div>
-);
-
-Modal.Body = ({ children }) => <div className={styles.body}>{children}</div>;
 
 export default Modal;

@@ -1,14 +1,15 @@
-import { useUser } from "../../components/user";
 import { useEffect, useState } from "react";
-import { InnerLoading } from "../../components/loading";
-import { ServerInfo } from "../../components/server";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import styles from "../../styles/Server.module.css";
-import Navbar from "../../components/navbar";
 import api from "../../api";
 import Link from "next/link";
-import moment from "moment";
+import dynamic from "next/dynamic";
+import { useUser } from "../../components/user";
+import { InnerLoading } from "../../components/loading";
+const moment = dynamic(() => import("moment"));
+const ServerInfo = dynamic(() => import("../../components/server/serverInfo"));
+const Navbar = dynamic(() => import("../../components/navbar"));
 
 export default function Server() {
     const [serverInfo, setServerInfo] = useState(null);

@@ -71,6 +71,36 @@ class API {
             endpoint: `/servers/${id}/analytics`,
         });
     }
+    async adminUpdateServer({
+        id,
+        name,
+        description,
+        address,
+        votes,
+        discord,
+        approved,
+        disabled,
+        verified,
+        tags,
+        owner,
+    }) {
+        return await this.request({
+            endpoint: `/admin/servers/${id}`,
+            method: "PUT",
+            body: {
+                name,
+                description,
+                address,
+                votes: Number(votes),
+                discord,
+                approved,
+                disabled,
+                verified,
+                tags,
+                owner,
+            },
+        });
+    }
 }
 
 export default new API();

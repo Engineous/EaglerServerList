@@ -2,14 +2,15 @@ import { useEffect, useState } from "react";
 import { useUser } from "../../components/user";
 import Head from "next/head";
 import styles from "/styles/Profile.module.css";
-import Navbar from "../../components/navbar";
+import { InnerLoading } from "../../components/loading";
 import api from "../../api";
-import Userbox from "../../components/userBox";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { FaDiscord } from "react-icons/fa";
 import Button from "../../components/button";
-import { InnerLoading } from "../../components/loading";
+import dynamic from "next/dynamic";
+const Navbar = dynamic(() => import("../../components/navbar"));
+const Userbox = dynamic(() => import("../../components/userBox"));
 
 export default function Profile() {
     const router = useRouter();
