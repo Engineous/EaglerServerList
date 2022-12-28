@@ -36,6 +36,7 @@ import {
     MdVisibilityOff,
     MdDescription,
     MdAnalytics,
+    MdEdit,
 } from "react-icons/md";
 import { IoMdThumbsUp, IoMdThumbsDown } from "react-icons/io";
 import { GiStoneBlock, GiSwordsEmblem } from "react-icons/gi";
@@ -115,6 +116,7 @@ const ServerInfo = ({ server: serverInfo, analytics }) => {
     const notify = useNotification();
 
     const setVotesRef = useRef();
+    const editServerRef = useRef();
 
     const postComment = async (captcha) => {
         commentCaptcha.reset();
@@ -276,6 +278,16 @@ const ServerInfo = ({ server: serverInfo, analytics }) => {
 
     return (
         <>
+            <Modal ref={editServerRef} title="Edit Server" height="350px">
+                <p
+                    style={{
+                        color: "#757575",
+                    }}
+                >
+                    Edit your server information.
+                </p>
+
+            </Modal>
             <Modal ref={setVotesRef} title="Set Votes" height="175px">
                 <p
                     style={{
@@ -380,6 +392,21 @@ const ServerInfo = ({ server: serverInfo, analytics }) => {
                                 </p>
                             )}
                         </div>
+                        {user && user.admin || user.uuid == server.user.uuid ? (
+                            <div className={styles.flexColumn}>
+                                <h3>Edit</h3>
+                                <Button
+                                    icon={<MdEdit />}
+                                    color="#202020"
+                                    iconColor="#fb8464"
+                                    onClick={() => editServerRef.current.open()}
+                                >
+                                    Edit Server
+                                </Button>
+                            </div>
+                        ) : (
+                            <></>
+                        )}
                     </div>
                 </Card>
                 <Card icon={<MdInsertChart />} text="Votes">
