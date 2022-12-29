@@ -60,3 +60,49 @@
     font-size: 14px;
     font-family: Poppins;
 }
+
+.richInputContainer {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 85px;
+    border: 2px solid #303030;
+    border-radius: 40px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    transition: 0.25s all ease-in-out;
+}
+
+.richInputContainer:hover {
+    border: 2px solid #606060;
+}
+
+.richInputContainer:focus {
+    border: 2px solid #fb8464;
+}
+
+.richInputContainer:focus-within {
+    border: 2px solid #fb8464;
+}
+
+.richInput {
+    width: 100%;
+    height: 100%;
+    outline: none;
+    border: none;
+}
+
+.richInput textarea {
+    margin: 15px 0;
+    width: 98%;
+    height: 98%;
+    background: transparent;
+    outline: none;
+    border: none;
+    color: #fff;
+    font-size: 14px;
+    font-family: Poppins;
+}

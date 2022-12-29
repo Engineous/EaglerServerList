@@ -18,7 +18,11 @@ const Avatar = () => {
         <div className={styles.avatarContainer}>
             <div
                 className={styles.avatar}
-                onClick={() => router.push(`/users/${user.uuid}`)}
+                onClick={() => {
+                    router
+                        .push("/")
+                        .then(() => router.push(`/users/${user.uuid}`));
+                }}
             >
                 <img src={user.avatar} />
                 <p>{user.username}</p>

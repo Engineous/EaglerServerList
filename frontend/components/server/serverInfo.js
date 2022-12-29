@@ -1,5 +1,5 @@
 import { useUser } from "../../components/user";
-import { useState, useRef } from "react";
+import { useState, useRef, forwardRef } from "react";
 import { useRouter } from "next/router";
 import { CircularProgress } from "@mui/material";
 import { GoVerified } from "react-icons/go";
@@ -53,6 +53,8 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 import Input from "../input";
+import RichInput from "../input/richInput";
+import { BiRename } from "react-icons/bi";
 const ReactMarkdown = dynamic(() => import("react-markdown"));
 
 const badges = {
@@ -110,6 +112,10 @@ const ServerInfo = ({ server: serverInfo, analytics }) => {
     // Admin action stuff
     const [updating, setUpdating] = useState(false);
     const [votes, setVotes] = useState(server.votes);
+
+    // Edit server
+    const [name, setName] = useState("");
+    const [description, setDescription] = useState("");
 
     const { user } = useUser();
     const router = useRouter();
@@ -215,9 +221,58 @@ const ServerInfo = ({ server: serverInfo, analytics }) => {
         }
         setVoting(false);
     };
+    const handleEdit = async () => {
+        setUpdating(true);
+
+        try {
+            const data = await api.updateServer({
+                id: serverInfo.uuid,
+                name,
+                description,
+            });
+            if (data.success) {
+                setServerInfo({
+                    ...serverInfo,
+                    name,
+                    description,
+                });
+                notify({
+                    type: "success",
+                    content: "Successfully updated the server.",
+                });
+            }
+        } catch (err) {
+            if (err.response && err.response.status == 429) {
+                const retryAfter = err.response.headers["retry-after"];
+                notify({
+                    type: "error",
+                    content: `You are being rate limited.${
+                        retryAfter
+                            ? ` Please retry after ${retryAfter} seconds.`
+                            : ""
+                    }`,
+                });
+            } else if (
+                !err.response ||
+                !err.response.data ||
+                !err.response.data.message
+            )
+                notify({
+                    type: "error",
+                    content: "An unknown error occurred.",
+                });
+            else
+                notify({
+                    type: "error",
+                    content: err.response.data.message,
+                });
+        }
+        setUpdating(false);
+        editServerRef.current.close();
+    }
     const updateVotes = async () => {
         setUpdating(true);
-        
+
         try {
             const data = await api.adminUpdateServer({
                 id: serverInfo.uuid,
@@ -243,7 +298,7 @@ const ServerInfo = ({ server: serverInfo, analytics }) => {
                         retryAfter
                             ? ` Please retry after ${retryAfter} seconds.`
                             : ""
-                    }`
+                    }`,
                 });
             } else if (
                 !err.response ||
@@ -262,7 +317,7 @@ const ServerInfo = ({ server: serverInfo, analytics }) => {
         }
         setUpdating(false);
         setVotesRef.current.close();
-    }
+    };
     ChartJS.register(
         CategoryScale,
         LinearScale,
@@ -278,7 +333,7 @@ const ServerInfo = ({ server: serverInfo, analytics }) => {
 
     return (
         <>
-            <Modal ref={editServerRef} title="Edit Server" height="350px">
+            <Modal ref={editServerRef} title="Edit Server" height="275px">
                 <p
                     style={{
                         color: "#757575",
@@ -286,7 +341,31 @@ const ServerInfo = ({ server: serverInfo, analytics }) => {
                 >
                     Edit your server information.
                 </p>
-
+                <Input
+                    value={name}
+                    startIcon={<BiRename />}
+                    placeholder="Please enter a server name"
+                    onChange={setName}
+                />
+                <RichInput
+                    value={description}
+                    startIcon={<MdDescription />}
+                    placeholder="Please enter a description"
+                    onChange={setDescription}
+                />
+                {updating ? (
+                    <CircularProgress />
+                ) : (
+                    <Button
+                        icon={<MdEdit />}
+                        iconColor="#fb8464"
+                        color="#101010"
+                        disabled={!name && !description}
+                        onClick={handleEdit}
+                    >
+                        Submit Changes
+                    </Button>
+                )}
             </Modal>
             <Modal ref={setVotesRef} title="Set Votes" height="175px">
                 <p
@@ -392,7 +471,8 @@ const ServerInfo = ({ server: serverInfo, analytics }) => {
                                 </p>
                             )}
                         </div>
-                        {user && user.admin || user.uuid == server.user.uuid ? (
+                        {(user && user.admin) ||
+                        (user && user.uuid == server.user.uuid) ? (
                             <div className={styles.flexColumn}>
                                 <h3>Edit</h3>
                                 <Button
@@ -561,7 +641,8 @@ const ServerInfo = ({ server: serverInfo, analytics }) => {
                                 avatar={user.avatar}
                                 onChange={setCommentContent}
                                 value={commentContent}
-                                onClick={() => {
+                                onClick={(event) => {
+                                    event.preventDefault();
                                     commentCaptcha.execute();
                                 }}
                                 disabled={commentContent == ""}

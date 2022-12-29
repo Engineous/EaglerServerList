@@ -14,8 +14,7 @@ export default function Profile() {
         if (!user) {
             router.push("/");
         }
-    }),
-        [user];
+    });
     return (
         <>
             <Navbar />

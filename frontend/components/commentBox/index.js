@@ -33,16 +33,19 @@ const CommentBox = ({
             <div className={styles.inputStartIcon}>
                 <img src={avatar} />
             </div>
-            <div className={styles.commentInput}>
+            <form className={styles.commentInput}>
                 <input
                     value={value}
                     type="text"
                     placeholder="Type a comment..."
                     onChange={(event) => onChange(event.target.value)}
+                    onSubmit={onClick}
+                    onS
                 />
                 <button
                     className={disabled ? styles.disabledButton : styles.button}
                     onClick={disabled ? () => {} : loading ? () => {} : onClick}
+                    type="submit"
                 >
                     {loading ? (
                         <CircularProgress size={20} />
@@ -50,7 +53,7 @@ const CommentBox = ({
                         <MdSend color={disabled ? "#fff" : "#fb8464"} />
                     )}
                 </button>
-            </div>
+            </form>
         </div>
     </div>
 );

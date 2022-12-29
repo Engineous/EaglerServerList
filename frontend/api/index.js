@@ -71,6 +71,20 @@ class API {
             endpoint: `/servers/${id}/analytics`,
         });
     }
+    async updateServer({
+        id,
+        name,
+        description,
+    }) {
+        return await this.request({
+            endpoint: `/servers/${id}`,
+            method: "PUT",
+            body: {
+                name,
+                description,
+            },
+        });
+    }
     async adminUpdateServer({
         id,
         name,
