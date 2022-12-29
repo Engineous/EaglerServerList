@@ -336,16 +336,17 @@ router.put(
                 message: "Tags must be an array.",
             });
 
-        try {
-            tags.forEach((tag) => {
-                if (!validTags.includes(tag)) throw new Error();
-            });
-        } catch (_) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid tags specified.",
-            });
-        }
+        if (tags)
+            try {
+                tags.forEach((tag) => {
+                    if (!validTags.includes(tag)) throw new Error();
+                });
+            } catch (_) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid tags specified.",
+                });
+            }
 
         const server = await prisma.server.findUnique({
             where: {

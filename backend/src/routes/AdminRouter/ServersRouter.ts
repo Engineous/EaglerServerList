@@ -86,7 +86,7 @@ router.put(
             !name &&
             !description &&
             !address &&
-            !votes &&
+            !String(votes) &&
             !discord &&
             !tags &&
             !approved &&
