@@ -124,3 +124,16 @@
         flex-direction: column;
     }
 }
+
+/* new.js extras */
+.formBasis{
+    margin: 20px;
+}
+.forminitial > textarea {
+    margin-bottom: 20px;
+}
+.rootNew{
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+}
