@@ -45,6 +45,19 @@ class API {
         });
     }
 
+    async createServer({ name, description, ip, tags }) {
+        return await this.request({
+            endpoint: "/servers/",
+            method: "POST",
+            body: {
+                name,
+                description,
+                address: ip,
+                tags,
+            },
+        });
+    }
+
     async postComment({ uuid, content, captcha }) {
         return await this.request({
             endpoint: `/servers/${uuid}`,

@@ -11,8 +11,10 @@ import { HiServer } from "react-icons/hi";
 import dynamic from "next/dynamic";
 import Input from "../../components/input";
 import RichInput from "../../components/input/richInput";
+import Button from "../../components/button";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
+import api from "../../api";
 const Selectrix = process.browser ? dynamic(() => import("react-selectrix")) : null; // tags are cancer
 
 export default function newServers() {
@@ -22,6 +24,20 @@ export default function newServers() {
     const [description, setDescription] = useState("");
     const [ip, setIp] = useState("");
     const [tags, setTags] = useState([]);
+    const submitServer = () => {
+        api.createServer({
+                name,
+                description,
+                ip,
+                tags,
+            })
+            .then((data) => {
+                console.log(data)
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    };
 
     useEffect(() => {
         if (!user) {
@@ -57,33 +73,37 @@ export default function newServers() {
             </Head>
             <div className={styles.rootNew}>
                 <Navbar />
-                <div class={styles.formBasis}>
+                <div className={styles.formBasis}>
                     <Card
                         icon={<AiOutlineForm />}
                         text="Server Listing"   
                     >
-                        <form class={styles.forminitial}>
-                            <Input
-                                label="Server Name"
-                                placeholder="Server Name"
-                                onChange={setName}
-                                startIcon={<BiRename />}
-                            />
-                            <div style={{ marginBottom: "20px" }}></div>
-                            <Input
-                                label="Server Address"
-                                placeholder="Server Address"
-                                onChange={setIp}
-                                startIcon={<HiServer />}
-                            />
-                            <div style={{ marginBottom: "20px" }}></div>
-                            <Input
-                                label="Server Description"
-                                placeholder="Server Description"
-                                onChange={setDescription}
-                                startIcon={<MdDescription />}
-                            />
-                        </form>
+                        <Input
+                            label="Server Name"
+                            placeholder="Server Name"
+                            onChange={setName}
+                            startIcon={<BiRename />}
+                        />
+                        <Input
+                            label="Server Address"
+                            placeholder="Server Address"
+                            onChange={setIp}
+                            startIcon={<HiServer />}
+                        />
+                        <RichInput
+                            label="Server Description"
+                            placeholder="Server Description"
+                            onChange={setDescription}
+                            startIcon={<MdDescription />}
+                        />
+                        <div className={styles.flexCenter}>
+                            <Button 
+                                text="Submit"
+                                onClick={submitServer}
+                                >
+                                    Submit
+                                </Button>
+                        </div>
                     </Card>
                 </div>
             </div>

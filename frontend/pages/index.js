@@ -48,6 +48,7 @@ export default function Home() {
                 <meta property="og:title" content="Eagler Server List - Home" />
                 <meta property="og:type" content="website" />
                 <link rel="icon" href="/favicon.ico" />
+                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2230943795732741" crossorigin="anonymous"></script>
             </Head>
             <div>
                 <Navbar />
