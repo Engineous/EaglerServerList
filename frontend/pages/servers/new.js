@@ -6,17 +6,17 @@ import Card from "../../components/card";
 import { useState, useRef, forwardRef } from "react";
 import { AiOutlineForm } from "react-icons/ai";
 import { BiOutline, BiRename } from "react-icons/bi";
+import { AiFillTag } from "react-icons/ai";
 import { MdDescription } from "react-icons/md";
 import { HiServer } from "react-icons/hi";
-import dynamic from "next/dynamic";
+import "@yaireo/tagify/dist/tagify.css";
 import Input from "../../components/input";
 import RichInput from "../../components/input/richInput";
 import Button from "../../components/button";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
+import { useNotification } from "../../components/notification";
 import api from "../../api";
-const Selectrix = process.browser ? dynamic(() => import("react-selectrix")) : null; // tags are cancer
-
 export default function newServers() {
     const { user } = useUser();
     const router = useRouter();
@@ -24,6 +24,7 @@ export default function newServers() {
     const [description, setDescription] = useState("");
     const [ip, setIp] = useState("");
     const [tags, setTags] = useState([]);
+    const notify = useNotification();
     const submitServer = () => {
         api.createServer({
                 name,
@@ -32,13 +33,21 @@ export default function newServers() {
                 tags,
             })
             .then((data) => {
-                console.log(data)
+                notify({
+                    type: "success",
+                    content: "Server created!",
+                });
             })
             .catch((err) => {
-                console.log(err);
+                notify({
+                    type: "error",
+                    content: "Failed to create servers. Did you miss a field?.", // FIXME: yeah yeah, ill make if statements
+                });
             });
     };
-
+    const tagifyRef = useRef(null);
+    const tagifySettings = {
+    };
     useEffect(() => {
         if (!user) {
             router.push("/");

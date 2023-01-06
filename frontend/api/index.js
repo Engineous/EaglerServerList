@@ -128,6 +128,11 @@ class API {
             },
         });
     }
+    async getUserServers() {
+        return await this.request({
+            endpoint: `/servers/@me`,
+        });
+    }
 }
 
 export default new API();
