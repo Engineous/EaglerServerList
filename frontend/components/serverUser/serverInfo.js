@@ -269,7 +269,7 @@ const ServerInfo = ({ server: serverInfo, analytics }) => {
         }
         setUpdating(false);
         editServerRef.current.close();
-    }
+    };
     const updateVotes = async () => {
         setUpdating(true);
 

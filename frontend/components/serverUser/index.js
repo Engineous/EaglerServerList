@@ -13,9 +13,7 @@ const UserServer = ({ server, motd, inline }) => {
 
     return inline ? (
         <div className={styles.inlineBox}>
-            <h2>
-                {server.name}{" "}
-            </h2>
+            <h2>{server.name} </h2>
             <h3>
                 <Timestamp date={server.createdAt} autoUpdate />
             </h3>
@@ -32,7 +30,11 @@ const UserServer = ({ server, motd, inline }) => {
             <h2>
                 {server.name}{" "}
                 {server.approved && <GoVerified color="#fb8464" />}
-                {server.verified ? (<Badge color="#fb8464">Verified</Badge>):(<Badge color="#fb8464">Not Verified</Badge>)}
+                {server.verified ? (
+                    <Badge color="#fb8464">Verified</Badge>
+                ) : (
+                    <Badge color="#fb8464">Not Verified</Badge>
+                )}
             </h2>
             <h3
                 style={{

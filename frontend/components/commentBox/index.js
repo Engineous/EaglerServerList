@@ -40,7 +40,6 @@ const CommentBox = ({
                     placeholder="Type a comment..."
                     onChange={(event) => onChange(event.target.value)}
                     onSubmit={onClick}
-                    onS
                 />
                 <button
                     className={disabled ? styles.disabledButton : styles.button}

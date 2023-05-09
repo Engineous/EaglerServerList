@@ -27,11 +27,11 @@ export default function newServers() {
     const notify = useNotification();
     const submitServer = () => {
         api.createServer({
-                name,
-                description,
-                ip,
-                tags,
-            })
+            name,
+            description,
+            ip,
+            tags,
+        })
             .then((data) => {
                 notify({
                     type: "success",
@@ -39,15 +39,34 @@ export default function newServers() {
                 });
             })
             .catch((err) => {
-                notify({
-                    type: "error",
-                    content: "Failed to create servers. Did you miss a field?.", // FIXME: yeah yeah, ill make if statements
-                });
+                if (err.response && err.response.status == 429) {
+                    const retryAfter = err.response.headers["retry-after"];
+                    notify({
+                        type: "error",
+                        content: `You are being rate limited.${
+                            retryAfter
+                                ? ` Please retry after ${retryAfter} seconds.`
+                                : ""
+                        }`,
+                    });
+                } else if (
+                    !err.response ||
+                    !err.response.data ||
+                    !err.response.data.message
+                )
+                    notify({
+                        type: "error",
+                        content: "An unknown error occurred.",
+                    });
+                else
+                    notify({
+                        type: "error",
+                        content: err.response.data.message,
+                    });
             });
     };
     const tagifyRef = useRef(null);
-    const tagifySettings = {
-    };
+    const tagifySettings = {};
     useEffect(() => {
         if (!user) {
             router.push("/");
@@ -56,18 +75,13 @@ export default function newServers() {
     return (
         <>
             <Head>
-                <title>
-                    Eagler Server List - Server Listing
-                </title>
+                <title>Eagler Server List - Server Listing</title>
                 <meta
                     name="viewport"
                     content="width=device-width, initial-scale=1, shrink-to-fit=no"
                 />
                 <meta httpEquiv="x-ua-compatible" content="ie=edge" />
-                <meta
-                    property="og:description"
-                    content="List your server!"
-                />
+                <meta property="og:description" content="List your server!" />
                 <meta
                     property="twitter:description"
                     content="List your server!"
@@ -79,15 +93,16 @@ export default function newServers() {
                 />
                 <meta property="og:type" content="website" />
                 <link rel="icon" href="/favicon.ico" />
-                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2230943795732741" crossorigin="anonymous"></script>
+                <script
+                    async
+                    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2230943795732741"
+                    crossorigin="anonymous"
+                ></script>
             </Head>
             <div className={styles.rootNew}>
                 <Navbar />
                 <div className={styles.formBasis}>
-                    <Card
-                        icon={<AiOutlineForm />}
-                        text="Server Listing"   
-                    >
+                    <Card icon={<AiOutlineForm />} text="Server Listing">
                         <Input
                             label="Server Name"
                             placeholder="Server Name"
@@ -107,16 +122,13 @@ export default function newServers() {
                             startIcon={<MdDescription />}
                         />
                         <div className={styles.flexCenter}>
-                            <Button 
-                                text="Submit"
-                                onClick={submitServer}
-                                >
-                                    Submit
-                                </Button>
+                            <Button text="Submit" onClick={submitServer}>
+                                Submit
+                            </Button>
                         </div>
                     </Card>
                 </div>
             </div>
         </>
-    )
+    );
 }

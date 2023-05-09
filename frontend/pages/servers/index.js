@@ -24,7 +24,7 @@ export default function Servers() {
         api.getUserServers()
             .then((data) => {
                 setServersInfo(data.data);
-                console.log(data)
+                console.log(data);
                 setLoading(false);
             })
             .catch((err) => {
@@ -32,10 +32,9 @@ export default function Servers() {
                     type: "error",
                     content: "Failed to load servers.",
                 });
-                console.log(err)
+                console.log(err);
                 setLoading(false);
             });
-
     }, [user]);
 
     return (
@@ -62,14 +61,25 @@ export default function Servers() {
                 />
                 <meta property="og:type" content="website" />
                 <link rel="icon" href="/favicon.ico" />
-                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2230943795732741" crossorigin="anonymous"></script>
+                <script
+                    async
+                    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2230943795732741"
+                    crossorigin="anonymous"
+                ></script>
             </Head>
             <div>
                 <Navbar />
                 <div className={styles.homeRoot}>
                     <h1 className={styles.row}>
                         Your Servers
-                        <Button style={{marginLeft:"5px"}} icon={<MdAdd />} color="#fb8464" onClick={() => router.push("/servers/new")}>New</Button>
+                        <Button
+                            style={{ marginLeft: "5px" }}
+                            icon={<MdAdd />}
+                            color="#fb8464"
+                            onClick={() => router.push("/servers/new")}
+                        >
+                            New
+                        </Button>
                     </h1>
                     <p>Manage the servers that you own.</p>
                     {loading ? (

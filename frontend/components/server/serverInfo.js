@@ -114,8 +114,8 @@ const ServerInfo = ({ server: serverInfo, analytics }) => {
     const [votes, setVotes] = useState(server.votes);
 
     // Edit server
-    const [name, setName] = useState("");
-    const [description, setDescription] = useState("");
+    const [name, setName] = useState(server.name);
+    const [description, setDescription] = useState(server.description);
 
     const { user } = useUser();
     const router = useRouter();
@@ -225,16 +225,16 @@ const ServerInfo = ({ server: serverInfo, analytics }) => {
         setUpdating(true);
 
         try {
-            const data = await api.updateServer({
+            const { success, data } = await api.updateServer({
                 id: serverInfo.uuid,
                 name,
                 description,
             });
-            if (data.success) {
+            if (success) {
                 setServerInfo({
                     ...serverInfo,
-                    name,
-                    description,
+                    name: data.name,
+                    description: data.description,
                 });
                 notify({
                     type: "success",
@@ -269,7 +269,7 @@ const ServerInfo = ({ server: serverInfo, analytics }) => {
         }
         setUpdating(false);
         editServerRef.current.close();
-    }
+    };
     const updateVotes = async () => {
         setUpdating(true);
 
