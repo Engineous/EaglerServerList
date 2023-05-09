@@ -3,9 +3,9 @@ import { WebSocket } from "ws";
 import createLogger from "logging";
 const prisma = new PrismaClient();
 import { CronJob } from "cron";
-const version = "v1.0.4"
+const version = "v1.0.4";
 const logger = createLogger("Jasper");
-logger.info(`Started JASPER ${version}`)
+logger.info(`Started JASPER ${version}`);
 type ServerResponse = {
     data: {
         motd: string[];
@@ -56,11 +56,16 @@ const runAnalyticPlayerCount = () => {
             const ws = new WebSocket(`${serverInfo.address}`);
             logger.info(`Connecting to ${serverInfo.address}...`);
             ws.onopen = () => ws.send("Accept: MOTD.cache");
-            try{
+            try {
                 ws.on("message", async (msg) => {
                     ws.close();
                     logger.info(`Connected to ${serverInfo.address}`);
-                    const data = (safelyParseJSON(msg.toString()) as ServerResponse) ? (safelyParseJSON(msg.toString()) as ServerResponse).data : null; // very cancer code, but there is a reason for this
+                    const data = (safelyParseJSON(
+                        msg.toString()
+                    ) as ServerResponse)
+                        ? (safelyParseJSON(msg.toString()) as ServerResponse)
+                              .data
+                        : null; // very cancer code, but there is a reason for this
                     if (!data)
                         return logger.warn(
                             `Server ${serverInfo.address} returned invalid JSON data, skipping collection.`
@@ -81,10 +86,12 @@ const runAnalyticPlayerCount = () => {
                     });
                     logger.info(
                         `Successfully collected player count and uptime analytics for ${serverInfo.address}`
-                        );
+                    );
                 });
             } catch (_) {
-                logger.error(`Unable to process data from ${serverInfo.address}`)
+                logger.error(
+                    `Unable to process data from ${serverInfo.address}`
+                );
             }
             ws.onerror = async () => {
                 logger.warn(`Unable to connect to ${serverInfo.address}`);
@@ -106,8 +113,35 @@ const runAnalyticPlayerCount = () => {
             };
         });
     });
-    logger.info(`Last Run: ${Date.now()}`)
+    logger.info(`Last Run: ${Date.now()}`);
+};
+
+const runVoteCooldownCheck = () => {
+    logger.info("Running vote cooldown check...");
+    verifyConnection().then(async () => {
+        const cooldowns = await prisma.voteCooldown.findMany().catch(() => {});
+        if (!cooldowns) return;
+        await Promise.all(
+            cooldowns.map(async (cooldown) => {
+                if (cooldown.expiresAt < new Date())
+                    await prisma.voteCooldown
+                        .delete({
+                            where: {
+                                uuid: cooldown.uuid,
+                            },
+                        })
+                        .then(() =>
+                            logger.info(
+                                `Successfully removed vote cooldown for user ${cooldown.uuid} and server ${cooldown.serverId}`
+                            )
+                        )
+                        .catch(() => {});
+            })
+        );
+    });
 };
 
 const job = new CronJob("30 * * * *", runAnalyticPlayerCount);
+const voteCooldownJob = new CronJob("* * * * *", runVoteCooldownCheck);
 job.start();
+voteCooldownJob.start();
