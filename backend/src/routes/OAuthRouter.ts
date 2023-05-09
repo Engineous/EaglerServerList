@@ -104,6 +104,7 @@ router.get("/", async (req: Request, res: Response) => {
             }
         );
     } catch (err) {
+        console.log(err);
         return res.status(401).json({
             success: false,
             message: "Invalid OAuth code provided.",

@@ -239,6 +239,12 @@ router.post(
                 message: "Could not find a server with that UUID.",
             });
 
+        if (!server.verified)
+            return res.status(400).json({
+                success: false,
+                message: "You may not comment on an unverified server.",
+            });
+
         try {
             await validateCaptcha(captcha);
         } catch (_) {
@@ -303,7 +309,7 @@ router.put(
                 message: "Request did not contain a body.",
             });
 
-        const { name, description, discord } = req.body;
+        let { name, description, discord } = req.body;
         const tags: string[] = req.body.tags;
 
         if (!name && !description && !discord && !tags)
@@ -311,7 +317,7 @@ router.put(
                 success: false,
                 message: "No fields specified that can be updated.",
             });
-
+        
         if (name && name.length > 100)
             return res.status(400).json({
                 success: false,
@@ -367,12 +373,14 @@ router.put(
                     "You do not have permission to update other users' servers.",
             });
 
+        name = name == "" ? server.name : name;
+
         const newServer = await prisma.server.update({
             where: {
                 uuid: server.uuid,
             },
             data: {
-                name: name ?? server.name,
+                name,
                 description: description ?? server.description,
                 tags: tags ?? server.tags,
                 discord: discord ?? server.discord,
