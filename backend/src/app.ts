@@ -32,7 +32,7 @@ app.use((_err: Error, _req: Request, res: Response, _next: NextFunction) => {
     });
 });
 
-app.use("/", RootRouter);
+app.use("/api", RootRouter);
 
 export default function listen(port: number) {
     return new Promise<void>((resolve) => app.listen(port, resolve));
