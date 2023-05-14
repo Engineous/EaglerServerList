@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Loading } from "../components/loading";
+import Maintenance from "../components/loading/Maintenance";
 import { UserProvider } from "../components/user";
 import "../styles/globals.css";
 import api from "../api";
@@ -10,6 +11,9 @@ import NotificationProvider from "../components/notification";
 const App = ({ Component, pageProps }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [maintenance, setMaintenance] = useState(
+        Boolean(process.env.NEXT_PUBLIC_MAINTENANCE_MODE)
+    );
     const theme = createTheme({
         palette: {
             type: "dark",
@@ -30,7 +34,9 @@ const App = ({ Component, pageProps }) => {
         setTimeout(() => setLoading(false), 500);
     }, []);
 
-    return (
+    return maintenance ? (
+        <Maintenance />
+    ) : (
         <ThemeProvider theme={theme}>
             {loading ? (
                 <Loading />

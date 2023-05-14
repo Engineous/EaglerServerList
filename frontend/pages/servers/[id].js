@@ -11,7 +11,7 @@ const moment = dynamic(() => import("moment"));
 const ServerInfo = dynamic(() => import("../../components/server/serverInfo"));
 const Navbar = dynamic(() => import("../../components/navbar"));
 
-export default function Server() {
+export default function Server({ redirected }) {
     const [serverInfo, setServerInfo] = useState(null);
     const [serverAnalytics, setServerAnalytics] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -22,7 +22,10 @@ export default function Server() {
     useEffect(() => {
         api.getServer(id)
             .then((data) => {
-                setServerInfo(data.data);
+                setServerInfo({
+                    ...data.data,
+                    redirected, // Will determine if modal is shown
+                });
                 api.getAnalytics(id)
                     .then(async ({ data }) => {
                         const analytics = {
@@ -157,4 +160,14 @@ export default function Server() {
             </div>
         </>
     );
+}
+
+export async function getServerSideProps({ query }) {
+    const { _ } = query;
+
+    return {
+        props: {
+            redirected: Boolean(_),
+        },
+    };
 }

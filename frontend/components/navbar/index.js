@@ -6,6 +6,7 @@ import Button from "../button";
 import { FaDiscord, FaHome, FaServer } from "react-icons/fa";
 import { MdArrowForward, MdShield } from "react-icons/md";
 import api from "../../api";
+import Badge from "../badge";
 
 const Avatar = () => {
     const { user } = useUser();
@@ -63,6 +64,9 @@ const Navbar = () => {
             <div className={styles.logo}>
                 <img src="/eagler.png" />
                 <h1>Eagler Server List</h1>
+                <Badge color="#fb8464" inline>
+                    BETA
+                </Badge>
             </div>
             <div className={styles.spacer} />
             <ul className={styles.navElements}>
@@ -101,15 +105,12 @@ const Navbar = () => {
                     <Button
                         icon={<FaDiscord size={24} />}
                         color="#5865F2"
-                        onClick={() =>
-                            router.push(
-                                `https://discord.com/oauth2/authorize?client_id=${
+                        href={`https://discord.com/oauth2/authorize?client_id=${
                                     process.env.NEXT_PUBLIC_CLIENT_ID
                                 }&redirect_uri=${encodeURIComponent(
                                     process.env.NEXT_PUBLIC_REDIRECT_URI
                                 )}&response_type=code&scope=identify`
-                            )
-                        }
+                                }
                     >
                         Login with Discord
                     </Button>

@@ -1,3 +1,4 @@
+import { useRouter } from "next/router";
 import styles from "./Button.module.css";
 
 const Button = ({
@@ -6,9 +7,12 @@ const Button = ({
     iconColor,
     children,
     onClick,
+    href,
     disabled,
     style,
 }) => {
+    const router = useRouter();
+
     return disabled ? (
         <button
             style={{
@@ -27,7 +31,7 @@ const Button = ({
                 backgroundColor: color,
             }}
             className={styles.button}
-            onClick={onClick}
+            onClick={href ? () => router.push(href) : onClick}
         >
             <div
                 className={styles.buttonIcon}

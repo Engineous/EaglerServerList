@@ -17,14 +17,17 @@ import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { useNotification } from "../../components/notification";
 import api from "../../api";
-export default function newServers() {
+
+export default function NewServer() {
     const { user } = useUser();
     const router = useRouter();
+    const notify = useNotification();
+
     const [name, setName] = useState("");
     const [description, setDescription] = useState("");
     const [ip, setIp] = useState("");
     const [tags, setTags] = useState([]);
-    const notify = useNotification();
+
     const submitServer = () => {
         api.createServer({
             name,

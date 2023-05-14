@@ -412,6 +412,12 @@ const ServerInfo = ({ server: serverInfo, analytics }) => {
                 <h3>
                     Created at <Timestamp date={server.createdAt} />
                 </h3>
+                {server.redirected && (
+                    <h3>
+                        Verification needed!!!
+                    </h3>
+                )
+                }
                 <div className={styles.badgeContainer}>
                     {server.tags.map((tag, index) => (
                         <Badge
@@ -472,7 +478,7 @@ const ServerInfo = ({ server: serverInfo, analytics }) => {
                             )}
                         </div>
                         {(user && user.admin) ||
-                        (user && user.uuid == server.user.uuid) ? (
+                        (user && user.uuid == server.user.uuid) && (
                             <div className={styles.flexColumn}>
                                 <h3>Edit</h3>
                                 <Button
@@ -484,8 +490,6 @@ const ServerInfo = ({ server: serverInfo, analytics }) => {
                                     Edit Server
                                 </Button>
                             </div>
-                        ) : (
-                            <></>
                         )}
                     </div>
                 </Card>
