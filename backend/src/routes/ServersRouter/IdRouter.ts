@@ -1,6 +1,6 @@
 import prisma from "../../db";
 import { Router, Request, Response } from "express";
-import { ExplicitTypesOnFields, StringsOnly, User } from "../../middleware";
+import { ExplicitTypesOnFields, StringsOnly, User, Optional } from "../../middleware";
 import { daysFromNow, validateCaptcha } from "../../utils";
 import { WebSocket } from "ws";
 import { createHash } from "crypto";
@@ -24,7 +24,7 @@ const router = Router({
     mergeParams: true,
 });
 
-router.get("/", async (req: Request, res: Response) => {
+router.get("/", Optional, async (req: Request, res: Response) => {
     const server = await prisma.server.findUnique({
         where: {
             uuid: req.params.uuid,
@@ -62,6 +62,7 @@ router.get("/", async (req: Request, res: Response) => {
             verified: true,
             tags: true,
             votes: true,
+            code: true,
         },
     });
 
@@ -76,6 +77,9 @@ router.get("/", async (req: Request, res: Response) => {
             success: false,
             message: "A server with that UUID could not be found.",
         });
+
+    if (!req.user || req.user.uuid != server.user.uuid)
+        delete server.code;
 
     return res.json({
         success: true,

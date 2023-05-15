@@ -99,6 +99,59 @@ const User = async (req: Request, res: Response, next: NextFunction) => {
     return next();
 };
 
+const Optional = async (req: Request, res: Response, next: NextFunction) => {
+    if (!req.cookies.session)
+        return next();
+
+    const sessionString = req.cookies.session;
+    const session = await prisma.session.findUnique({
+        where: {
+            sessionString,
+        },
+    });
+
+    if (!session)
+        return next();
+
+    if (session.expiresAt < new Date()) {
+        await prisma.session.delete({
+            where: {
+                sessionString,
+            },
+        });
+        return next();
+    }
+
+    const user = await prisma.user.findUnique({
+        where: {
+            uuid: session.userId,
+        },
+    });
+
+    if (!user) {
+        await prisma.session.delete({
+            where: {
+                sessionString,
+            },
+        });
+        return next();
+    }
+
+    if (user.banned) {
+        await prisma.session.delete({
+            where: {
+                sessionString,
+            },
+        });
+
+        return next();
+    }
+
+    req.user = user;
+    req.session = session;
+    return next();
+};
+
 const Admin = async (req: Request, res: Response, next: NextFunction) => {
     if (!req.cookies.session)
         return res.status(401).json({
@@ -171,4 +224,4 @@ const StringsOnly = (req: Request, res: Response, next: NextFunction) => {
     return next();
 };
 
-export { ExplicitTypesOnFields, User, Admin, StringsOnly };
+export { ExplicitTypesOnFields, User, Admin, Optional, StringsOnly };
