@@ -1,0 +1,11 @@
+.root {
+    font-family: 'Space Mono', monospace;
+    padding: 5px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: left;
+    background-color: #303030;
+    border: 1px solid #505050;
+    border-radius: 10px;
+}

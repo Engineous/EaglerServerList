@@ -1,5 +1,5 @@
 import { useUser } from "../../components/user";
-import { useState, useRef, forwardRef } from "react";
+import { useState, useRef, forwardRef, useEffect } from "react";
 import { useRouter } from "next/router";
 import { CircularProgress } from "@mui/material";
 import { GoVerified } from "react-icons/go";
@@ -38,7 +38,7 @@ import {
     MdAnalytics,
     MdEdit,
 } from "react-icons/md";
-import { IoMdThumbsUp, IoMdThumbsDown } from "react-icons/io";
+import { IoMdThumbsUp, IoMdThumbsDown, IoIosCheckmarkCircle } from "react-icons/io";
 import { GiStoneBlock, GiSwordsEmblem } from "react-icons/gi";
 import { RiTeamFill } from "react-icons/ri";
 import {
@@ -55,6 +55,7 @@ import { Line } from "react-chartjs-2";
 import Input from "../input";
 import RichInput from "../input/richInput";
 import { BiRename } from "react-icons/bi";
+import CodeBox from "../codeBox";
 const ReactMarkdown = dynamic(() => import("react-markdown"));
 
 const badges = {
@@ -123,6 +124,7 @@ const ServerInfo = ({ server: serverInfo, analytics }) => {
 
     const setVotesRef = useRef();
     const editServerRef = useRef();
+    const verifyRef = useRef();
 
     const postComment = async (captcha) => {
         commentCaptcha.reset();
@@ -318,6 +320,9 @@ const ServerInfo = ({ server: serverInfo, analytics }) => {
         setUpdating(false);
         setVotesRef.current.close();
     };
+    useEffect(() => {
+        if (!server.verified) verifyRef.current.open();
+    }, [server]);
     ChartJS.register(
         CategoryScale,
         LinearScale,
@@ -395,6 +400,17 @@ const ServerInfo = ({ server: serverInfo, analytics }) => {
                     </Button>
                 )}
             </Modal>
+            <Modal
+                ref={verifyRef}
+                title="Verification Required"
+                height="220px"
+                forced
+            >
+                <p>This server requires verification.</p>
+                <CodeBox>confirm-code {serverInfo.code}</CodeBox>
+                <p>Please enter this command into your Bungee console, then click Verify.</p>
+                <Button icon={<IoIosCheckmarkCircle />} color="#fb8464">Verify</Button>
+            </Modal>
             {/* <SetVoteModal ref={setVotesRef} server={server} /> */}
             <div className={styles.flexCenter}>
                 <h1>
@@ -412,12 +428,7 @@ const ServerInfo = ({ server: serverInfo, analytics }) => {
                 <h3>
                     Created at <Timestamp date={server.createdAt} />
                 </h3>
-                {server.redirected && (
-                    <h3>
-                        Verification needed!!!
-                    </h3>
-                )
-                }
+                {server.redirected && <h3>Verification needed!!!</h3>}
                 <div className={styles.badgeContainer}>
                     {server.tags.map((tag, index) => (
                         <Badge
@@ -478,19 +489,21 @@ const ServerInfo = ({ server: serverInfo, analytics }) => {
                             )}
                         </div>
                         {(user && user.admin) ||
-                        (user && user.uuid == server.user.uuid) && (
-                            <div className={styles.flexColumn}>
-                                <h3>Edit</h3>
-                                <Button
-                                    icon={<MdEdit />}
-                                    color="#202020"
-                                    iconColor="#fb8464"
-                                    onClick={() => editServerRef.current.open()}
-                                >
-                                    Edit Server
-                                </Button>
-                            </div>
-                        )}
+                            (user && user.uuid == server.user.uuid && (
+                                <div className={styles.flexColumn}>
+                                    <h3>Edit</h3>
+                                    <Button
+                                        icon={<MdEdit />}
+                                        color="#202020"
+                                        iconColor="#fb8464"
+                                        onClick={() =>
+                                            editServerRef.current.open()
+                                        }
+                                    >
+                                        Edit Server
+                                    </Button>
+                                </div>
+                            ))}
                     </div>
                 </Card>
                 <Card icon={<MdInsertChart />} text="Votes">

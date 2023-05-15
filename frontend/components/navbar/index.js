@@ -106,11 +106,10 @@ const Navbar = () => {
                         icon={<FaDiscord size={24} />}
                         color="#5865F2"
                         href={`https://discord.com/oauth2/authorize?client_id=${
-                                    process.env.NEXT_PUBLIC_CLIENT_ID
-                                }&redirect_uri=${encodeURIComponent(
-                                    process.env.NEXT_PUBLIC_REDIRECT_URI
-                                )}&response_type=code&scope=identify`
-                                }
+                            process.env.NEXT_PUBLIC_CLIENT_ID
+                        }&redirect_uri=${encodeURIComponent(
+                            process.env.NEXT_PUBLIC_REDIRECT_URI
+                        )}&response_type=code&scope=identify`}
                     >
                         Login with Discord
                     </Button>
