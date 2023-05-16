@@ -18,6 +18,9 @@ router.get("/:uuid", async (req: Request, res: Response) => {
         },
         include: {
             servers: {
+                where: {
+                    disabled: false,
+                },
                 select: {
                     uuid: true,
                     name: true,
@@ -29,6 +32,11 @@ router.get("/:uuid", async (req: Request, res: Response) => {
                 },
             },
             comments: {
+                where: {
+                    server: {
+                        disabled: false,
+                    },
+                },
                 select: {
                     content: true,
                     postedAt: true,

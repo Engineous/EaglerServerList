@@ -1,6 +1,11 @@
 import prisma from "../../db";
 import { Router, Request, Response } from "express";
-import { ExplicitTypesOnFields, StringsOnly, User, Optional } from "../../middleware";
+import {
+    ExplicitTypesOnFields,
+    StringsOnly,
+    User,
+    Optional,
+} from "../../middleware";
 import { daysFromNow, validateCaptcha } from "../../utils";
 import { WebSocket } from "ws";
 import { createHash } from "crypto";
@@ -78,8 +83,13 @@ router.get("/", Optional, async (req: Request, res: Response) => {
             message: "A server with that UUID could not be found.",
         });
 
-    if (!req.user || req.user.uuid != server.user.uuid)
-        delete server.code;
+    if (!req.user || req.user.uuid != server.user.uuid) delete server.code;
+
+    if (!server.verified && (!req.user || req.user.uuid != server.user.uuid))
+        return res.status(400).json({
+            success: false,
+            message: "A server with that UUID could not be found.",
+        });
 
     return res.json({
         success: true,
@@ -321,7 +331,7 @@ router.put(
                 success: false,
                 message: "No fields specified that can be updated.",
             });
-        
+
         if (name && name.length > 100)
             return res.status(400).json({
                 success: false,
@@ -366,6 +376,12 @@ router.put(
 
         if (!server)
             return res.status(404).json({
+                success: false,
+                message: "A server with that UUID could not be found.",
+            });
+
+        if (server.disabled)
+            return res.status(400).json({
                 success: false,
                 message: "A server with that UUID could not be found.",
             });
@@ -535,6 +551,23 @@ router.post("/verify", User, async (req: Request, res: Response) => {
         },
     });
 
+    const { captcha } = req.body;
+
+    if (!captcha)
+        return res.status(400).json({
+            success: false,
+            message: "Missing CAPTCHA from request body.",
+        });
+
+    try {
+        await validateCaptcha(captcha);
+    } catch (_) {
+        return res.status(400).json({
+            success: false,
+            message: "Invalid CAPTCHA response.",
+        });
+    }
+
     if (!server)
         return res.status(404).json({
             success: false,
@@ -558,37 +591,48 @@ router.post("/verify", User, async (req: Request, res: Response) => {
         let shasum = createHash("sha1");
         let msg = "";
         ws.onopen = async () =>
-            ws.send("Accept: " + shasum.update(server.code).digest("hex"));
-        ws.onmessage = async (message) => (msg = message.data.toString());
-        ws.close = async () => {
-            if (msg == "OK") {
-                await prisma.server.update({
-                    where: {
-                        uuid: server.uuid,
-                    },
-                    data: {
-                        verified: true,
-                    },
-                });
-                return res.json({
-                    success: true,
-                    message: "Successfully verified server.",
-                });
-            } else
-                return res.status(400).json({
-                    success: false,
-                    message: "Could not verify server, please try again!",
-                });
-        };
-        ws.onerror = async () =>
-            res.status(400).json({
-                success: false,
-                message: "Unable to verify server, please try again!",
+            ws.send("Accept:" + shasum.update(server.code).digest("hex"));
+        try {
+            await new Promise<void>((resolve, reject) => {
+                const timer = setTimeout(() => reject(), 1000);
+                ws.onmessage = async (message) => {
+                    msg = message.data.toString();
+                    clearTimeout(timer);
+                    resolve();
+                };
+                ws.onerror = () => reject();
             });
+        } catch (_) {
+            ws.close();
+            return res.status(400).json({
+                success: false,
+                message: "Could not verify server, please try again.",
+            });
+        }
+        ws.close();
+        if (msg == "OK") {
+            await prisma.server.update({
+                where: {
+                    uuid: server.uuid,
+                },
+                data: {
+                    verified: true,
+                },
+            });
+            return res.json({
+                success: true,
+                message: "Successfully verified server.",
+            });
+        } else {
+            return res.status(400).json({
+                success: false,
+                message: "Could not verify server, please try again.",
+            });
+        }
     } catch (_) {
         return res.status(400).json({
             success: false,
-            message: "Unable to verify server, please try again!",
+            message: "Could not verify server, please try again.",
         });
     }
 });
