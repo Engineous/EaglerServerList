@@ -377,7 +377,8 @@ const ServerInfo = ({ server: serverInfo, analytics }) => {
         }
     };
     useEffect(() => {
-        if (!server.verified && user && user.uuid == server.user.uuid) verifyRef.current.open();
+        if (!server.verified && user && user.uuid == server.user.uuid)
+            verifyRef.current.open();
     }, [server]);
     ChartJS.register(
         CategoryScale,
