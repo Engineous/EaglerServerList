@@ -58,6 +58,16 @@ class API {
         });
     }
 
+    async verifyServer({ uuid, captcha }) {
+        return await this.request({
+            endpoint: `/servers/${uuid}/verify`,
+            method: "POST",
+            body: {
+                captcha,
+            },
+        });
+    }
+
     async postComment({ uuid, content, captcha }) {
         return await this.request({
             endpoint: `/servers/${uuid}`,
@@ -79,6 +89,7 @@ class API {
             },
         });
     }
+
     async getAnalytics(id) {
         return await this.request({
             endpoint: `/servers/${id}/analytics`,

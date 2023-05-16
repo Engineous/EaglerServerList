@@ -17,6 +17,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { useNotification } from "../../components/notification";
 import api from "../../api";
+import { FaServer } from "react-icons/fa";
 
 export default function NewServer() {
     const { user } = useUser();
@@ -40,6 +41,7 @@ export default function NewServer() {
                     type: "success",
                     content: "Server created!",
                 });
+                router.push(`/servers/${data.data.uuid}`);
             })
             .catch((err) => {
                 if (err.response && err.response.status == 429) {
@@ -125,7 +127,14 @@ export default function NewServer() {
                             startIcon={<MdDescription />}
                         />
                         <div className={styles.flexCenter}>
-                            <Button text="Submit" onClick={submitServer}>
+                            <Button
+                                icon={<FaServer size={12} />}
+                                color="#fb8464"
+                                onClick={submitServer}
+                                disabled={
+                                    name == "" || description == "" || ip == ""
+                                }
+                            >
                                 Submit
                             </Button>
                         </div>

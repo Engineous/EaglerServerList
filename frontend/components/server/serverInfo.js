@@ -38,7 +38,11 @@ import {
     MdAnalytics,
     MdEdit,
 } from "react-icons/md";
-import { IoMdThumbsUp, IoMdThumbsDown, IoIosCheckmarkCircle } from "react-icons/io";
+import {
+    IoMdThumbsUp,
+    IoMdThumbsDown,
+    IoIosCheckmarkCircle,
+} from "react-icons/io";
 import { GiStoneBlock, GiSwordsEmblem } from "react-icons/gi";
 import { RiTeamFill } from "react-icons/ri";
 import {
@@ -117,6 +121,10 @@ const ServerInfo = ({ server: serverInfo, analytics }) => {
     // Edit server
     const [name, setName] = useState(server.name);
     const [description, setDescription] = useState(server.description);
+
+    // Server verification stuff
+    const [verifyCaptcha, setVerifyCaptcha] = useState(null);
+    const [verifying, setVerifying] = useState(false);
 
     const { user } = useUser();
     const router = useRouter();
@@ -320,8 +328,56 @@ const ServerInfo = ({ server: serverInfo, analytics }) => {
         setUpdating(false);
         setVotesRef.current.close();
     };
+    const verifyServer = async (captcha) => {
+        setVerifying(true);
+
+        try {
+            const data = await api.verifyServer({
+                uuid: serverInfo.uuid,
+                captcha,
+            });
+            if (data.success) {
+                setServerInfo({
+                    ...serverInfo,
+                    verified: true,
+                });
+                notify({
+                    type: "success",
+                    content: "Successfully verified the server.",
+                });
+                setVerifying(false);
+                verifyRef.current.close();
+            }
+        } catch (err) {
+            setVerifying(false);
+            if (err.response && err.response.status == 429) {
+                const retryAfter = err.response.headers["retry-after"];
+                notify({
+                    type: "error",
+                    content: `You are being rate limited.${
+                        retryAfter
+                            ? ` Please retry after ${retryAfter} seconds.`
+                            : ""
+                    }`,
+                });
+            } else if (
+                !err.response ||
+                !err.response.data ||
+                !err.response.data.message
+            )
+                notify({
+                    type: "error",
+                    content: "An unknown error occurred.",
+                });
+            else
+                notify({
+                    type: "error",
+                    content: err.response.data.message,
+                });
+        }
+    };
     useEffect(() => {
-        if (!server.verified) verifyRef.current.open();
+        if (!server.verified && user && user.uuid == server.user.uuid) verifyRef.current.open();
     }, [server]);
     ChartJS.register(
         CategoryScale,
@@ -408,8 +464,36 @@ const ServerInfo = ({ server: serverInfo, analytics }) => {
             >
                 <p>This server requires verification.</p>
                 <CodeBox>confirm-code {serverInfo.code}</CodeBox>
-                <p>Please enter this command into your Bungee console, then click Verify.</p>
-                <Button icon={<IoIosCheckmarkCircle />} color="#fb8464">Verify</Button>
+                <p>
+                    Please enter this command into your Bungee console, then
+                    click Verify.
+                </p>
+                {verifying ? (
+                    <CircularProgress />
+                ) : (
+                    <>
+                        {" "}
+                        <Button
+                            icon={<IoIosCheckmarkCircle />}
+                            color="#fb8464"
+                            onClick={(event) => {
+                                event.preventDefault();
+                                verifyCaptcha.execute();
+                            }}
+                        >
+                            Verify
+                        </Button>
+                        <Reaptcha
+                            ref={(e) => {
+                                setVerifyCaptcha(e);
+                            }}
+                            sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
+                            onVerify={(res) => verifyServer(res)}
+                            theme="dark"
+                            size="invisible"
+                        />
+                    </>
+                )}
             </Modal>
             {/* <SetVoteModal ref={setVotesRef} server={server} /> */}
             <div className={styles.flexCenter}>
