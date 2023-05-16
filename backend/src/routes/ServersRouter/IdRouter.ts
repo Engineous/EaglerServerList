@@ -594,13 +594,13 @@ router.post("/verify", User, async (req: Request, res: Response) => {
             ws.send("Accept:" + shasum.update(server.code).digest("hex"));
         try {
             await new Promise<void>((resolve, reject) => {
-                const timer = setTimeout(() => reject(), 1000);
+                const timer = setTimeout(reject, 1000);
                 ws.onmessage = async (message) => {
                     msg = message.data.toString();
                     clearTimeout(timer);
                     resolve();
                 };
-                ws.onerror = () => reject();
+                ws.onerror = reject;
             });
         } catch (_) {
             ws.close();
