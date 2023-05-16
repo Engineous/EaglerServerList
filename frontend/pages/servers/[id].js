@@ -60,22 +60,28 @@ export default function Server({ redirected }) {
                                 },
                             ],
                         };
-                        await Promise.all(
-                            data.playerCount.map((stat) => {
-                                pcData.datasets[0].data.push(stat.playerCount);
-                                pcData.labels.push(
-                                    moment(stat.createdAt).format("HH:mm")
-                                );
-                            }),
-                            data.uptime.map((stat) => {
-                                uptimeData.datasets[0].data.push(stat.up);
-                                uptimeData.labels.push(
-                                    moment(stat.createdAt).format("HH:mm")
-                                );
-                            })
-                        );
-                        setServerAnalytics({ pc: pcData, uptime: uptimeData });
-                        setLoading(false);
+                        console.log("test");
+                        console.log(data.playerCount.length);
+                        console.log(data.uptime.length);
+                        for (const index in data.playerCount) {
+                            const stat = data.playerCount[index];
+                            console.log(stat);
+                            pcData.datasets[0].data.push(stat.playerCount);
+                            pcData.labels.push(
+                                moment(stat.createdAt).format("HH:mm")
+                            );
+                        }
+                        for (const index of data.uptime) {
+                            const stat = data.uptime[index];
+                            console.log(stat);
+                            uptimeData.datasets[0].data.push(stat.up);
+                            uptimeData.labels.push(
+                                moment(stat.createdAt).format("HH:mm")
+                            );
+                        }
+                            console.log("test");
+                            setServerAnalytics({ pc: pcData, uptime: uptimeData });
+                            setLoading(false);
                     })
                     .catch(() => setLoading(false));
             })
