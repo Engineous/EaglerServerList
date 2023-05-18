@@ -49,69 +49,76 @@ const runAnalyticPlayerCount = () => {
         const servers = await prisma.server.findMany({
             where: {
                 disabled: false,
-                approved: true,
+                verified: true,
             },
         });
-        servers.forEach(async (serverInfo: Server) => {
-            const ws = new WebSocket(`${serverInfo.address}`);
-            logger.info(`Connecting to ${serverInfo.address}...`);
-            ws.onopen = () => ws.send("Accept: MOTD.cache");
-            try {
-                ws.on("message", async (msg) => {
-                    ws.close();
-                    logger.info(`Connected to ${serverInfo.address}`);
-                    const data = (safelyParseJSON(
-                        msg.toString()
-                    ) as ServerResponse)
-                        ? (safelyParseJSON(msg.toString()) as ServerResponse)
-                              .data
-                        : null; // very cancer code, but there is a reason for this
-                    if (!data)
-                        return logger.warn(
-                            `Server ${serverInfo.address} returned invalid JSON data, skipping collection.`
+        for (const server of servers) {
+            await new Promise<void>((resolve) => {
+                let hasReceived = false;
+                const ws = new WebSocket(server.address);
+                logger.info(`Connecting to ${server.address}...`);
+                ws.onopen = () => ws.send("Accept: MOTD.cache");
+                try {
+                    ws.on("message", async (msg) => {
+                        if (hasReceived)
+                            return;
+                        ws.close();
+                        hasReceived = true;
+                        logger.info(`Connected to ${server.address}`);
+                        const data = (safelyParseJSON(
+                            msg.toString()
+                        ) as ServerResponse)
+                            ? (safelyParseJSON(msg.toString()) as ServerResponse)
+                                .data
+                            : null;
+                        if (!data)
+                            return logger.warn(`Server ${server.address} returned invalid JSON data, skipping collection.`);
+                        await prisma.analytic.create({
+                            data: {
+                                serverId: server.uuid,
+                                type: AnalyticType.PLAYER_COUNT,
+                                data: data.online.toString(),
+                            },
+                        });
+                        await prisma.analytic.create({
+                            data: {
+                                serverId: server.uuid,
+                                type: AnalyticType.UPTIME,
+                                data: "true",
+                            },
+                        });
+                        logger.info(
+                            `Successfully collected player count and uptime analytics for ${server.address}`,
                         );
-                    await prisma.analytic.create({
-                        data: {
-                            serverId: serverInfo.uuid,
-                            type: AnalyticType.PLAYER_COUNT,
-                            data: data.online.toString(),
-                        },
+                        resolve();
                     });
-                    await prisma.analytic.create({
-                        data: {
-                            serverId: serverInfo.uuid,
-                            type: AnalyticType.UPTIME,
-                            data: "true",
-                        },
-                    });
-                    logger.info(
-                        `Successfully collected player count and uptime analytics for ${serverInfo.address}`
+                } catch (_) {
+                    logger.error(
+                        `Unable to process data from ${server.address}`
                     );
-                });
-            } catch (_) {
-                logger.error(
-                    `Unable to process data from ${serverInfo.address}`
-                );
-            }
-            ws.onerror = async () => {
-                logger.warn(`Unable to connect to ${serverInfo.address}`);
-                await prisma.analytic.create({
-                    data: {
-                        serverId: serverInfo.uuid,
-                        type: AnalyticType.UPTIME,
-                        data: "false",
-                    },
-                });
-                await prisma.analytic.create({
-                    data: {
-                        serverId: serverInfo.uuid,
-                        type: AnalyticType.PLAYER_COUNT,
-                        data: "0",
-                    },
-                });
-                ws.terminate();
-            };
-        });
+                    resolve();
+                }
+                ws.onerror = async () => {
+                    logger.warn(`Unable to connect to ${server.address}`);
+                    await prisma.analytic.create({
+                        data: {
+                            serverId: server.uuid,
+                            type: AnalyticType.UPTIME,
+                            data: "false",
+                        },
+                    });
+                    await prisma.analytic.create({
+                        data: {
+                            serverId: server.uuid,
+                            type: AnalyticType.PLAYER_COUNT,
+                            data: "0",
+                        },
+                    });
+                    ws.terminate();
+                    resolve();
+                };
+            });
+        }
     });
     logger.info(`Last Run: ${Date.now()}`);
 };
