@@ -60,19 +60,23 @@ const runAnalyticPlayerCount = () => {
                 ws.onopen = () => ws.send("Accept: MOTD.cache");
                 try {
                     ws.on("message", async (msg) => {
-                        if (hasReceived)
-                            return;
+                        if (hasReceived) return;
                         ws.close();
                         hasReceived = true;
                         logger.info(`Connected to ${server.address}`);
                         const data = (safelyParseJSON(
                             msg.toString()
                         ) as ServerResponse)
-                            ? (safelyParseJSON(msg.toString()) as ServerResponse)
-                                .data
+                            ? (
+                                  safelyParseJSON(
+                                      msg.toString()
+                                  ) as ServerResponse
+                              ).data
                             : null;
                         if (!data)
-                            return logger.warn(`Server ${server.address} returned invalid JSON data, skipping collection.`);
+                            return logger.warn(
+                                `Server ${server.address} returned invalid JSON data, skipping collection.`
+                            );
                         await prisma.analytic.create({
                             data: {
                                 serverId: server.uuid,
@@ -88,7 +92,7 @@ const runAnalyticPlayerCount = () => {
                             },
                         });
                         logger.info(
-                            `Successfully collected player count and uptime analytics for ${server.address}`,
+                            `Successfully collected player count and uptime analytics for ${server.address}`
                         );
                         resolve();
                     });
